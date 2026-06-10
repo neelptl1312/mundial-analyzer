@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mundial 2026 Analyzer</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">⚽ Mundial 2026 Analyzer</div>
+    <nav>
+      <button class="nav-btn active" onclick="showTab('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="showTab('match')">Analizar partido</button>
+      <button class="nav-btn" onclick="showTab('parlay')">Parlay builder</button>
+    </nav>
+    <div id="api-status" class="status-badge">Conectando...</div>
+  </div>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <section id="tab-dashboard" class="tab active">
+    <div class="section-header">
+      <h2>Los 48 equipos — Mundial 2026</h2>
+      <div class="filters">
+        <select id="filter-group" onchange="filterTeams()">
+          <option value="">Todos los grupos</option>
+          <option value="A">Grupo A</option><option value="B">Grupo B</option>
+          <option value="C">Grupo C</option><option value="D">Grupo D</option>
+          <option value="E">Grupo E</option><option value="F">Grupo F</option>
+          <option value="G">Grupo G</option><option value="H">Grupo H</option>
+          <option value="I">Grupo I</option><option value="J">Grupo J</option>
+          <option value="K">Grupo K</option><option value="L">Grupo L</option>
+        </select>
+        <select id="sort-teams" onchange="filterTeams()">
+          <option value="fifa_rating">Rating FIFA</option>
+          <option value="form_score">Forma reciente</option>
+          <option value="attack">Ataque</option>
+          <option value="defense">Defensa</option>
+        </select>
+      </div>
+    </div>
+    <div id="teams-grid" class="teams-grid"></div>
+  </section>
+
+  <!-- MATCH ANALYZER -->
+  <section id="tab-match" class="tab">
+    <div class="match-picker">
+      <div class="team-selector">
+        <label>Equipo local</label>
+        <select id="pick-home"></select>
+      </div>
+      <div class="vs-label">VS</div>
+      <div class="team-selector">
+        <label>Equipo visitante</label>
+        <select id="pick-away"></select>
+      </div>
+      <button class="analyze-btn" onclick="analyzeMatch()">Analizar ↗</button>
+    </div>
+    <div id="match-result" class="match-result hidden"></div>
+  </section>
+
+  <!-- PARLAY BUILDER -->
+  <section id="tab-parlay" class="tab">
+    <div class="parlay-layout">
+      <div class="parlay-left">
+        <h3>Agregar selección</h3>
+        <div class="parlay-form">
+          <select id="parlay-home"><option value="">Local...</option></select>
+          <select id="parlay-away"><option value="">Visitante...</option></select>
+          <select id="parlay-type">
+            <option value="home_win">Local gana</option>
+            <option value="away_win">Visitante gana</option>
+            <option value="draw">Empate</option>
+            <option value="over_25">+2.5 goles</option>
+            <option value="under_25">-2.5 goles</option>
+            <option value="btts_yes">Ambos anotan</option>
+            <option value="over_35">+3.5 goles</option>
+            <option value="over_9_corners">+9 corners</option>
+            <option value="over_3_yellow">+3 amarillas</option>
+          </select>
+          <button onclick="addParlay()">+ Agregar</button>
+        </div>
+        <div id="parlay-legs" class="parlay-legs"></div>
+        <button class="analyze-btn" onclick="calculateParlay()" id="calc-parlay-btn" disabled>Calcular parlay ↗</button>
+      </div>
+      <div class="parlay-right" id="parlay-result"></div>
+    </div>
+  </section>
+</main>
+
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/simulator.js"></script>
+<script src="/static/js/parlay.js"></script>
+</body>
+</html>
