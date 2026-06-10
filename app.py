@@ -105,19 +105,53 @@ STATS = {
 }
 
 FALLBACK_MATCHES = [
-    {"id":1,"homeTeam":{"name":"México"},"awayTeam":{"name":"Sudáfrica"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-11T18:00:00Z","group":"Grupo A"},
-    {"id":2,"homeTeam":{"name":"EE.UU."},"awayTeam":{"name":"Paraguay"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-12T21:00:00Z","group":"Grupo D"},
-    {"id":3,"homeTeam":{"name":"Canadá"},"awayTeam":{"name":"Qatar"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-12T18:00:00Z","group":"Grupo B"},
-    {"id":4,"homeTeam":{"name":"Argentina"},"awayTeam":{"name":"Argelia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-13T18:00:00Z","group":"Grupo J"},
-    {"id":5,"homeTeam":{"name":"España"},"awayTeam":{"name":"Japón"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-13T21:00:00Z","group":"Grupo H"},
-    {"id":6,"homeTeam":{"name":"Brasil"},"awayTeam":{"name":"Marruecos"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-14T18:00:00Z","group":"Grupo C"},
-    {"id":7,"homeTeam":{"name":"Francia"},"awayTeam":{"name":"Colombia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-14T21:00:00Z","group":"Grupo I"},
-    {"id":8,"homeTeam":{"name":"Portugal"},"awayTeam":{"name":"Croacia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T18:00:00Z","group":"Grupo K"},
-    {"id":9,"homeTeam":{"name":"Alemania"},"awayTeam":{"name":"Ecuador"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T21:00:00Z","group":"Grupo E"},
-    {"id":10,"homeTeam":{"name":"Inglaterra"},"awayTeam":{"name":"Suecia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T18:00:00Z","group":"Grupo L"},
-    {"id":11,"homeTeam":{"name":"Países Bajos"},"awayTeam":{"name":"Arabia Saudita"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T21:00:00Z","group":"Grupo F"},
-    {"id":12,"homeTeam":{"name":"Bélgica"},"awayTeam":{"name":"Senegal"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-17T18:00:00Z","group":"Grupo G"},
+    # GRUPO A - Jun 11-25
+    {"id":1,"homeTeam":{"name":"México"},"awayTeam":{"name":"Corea del Sur"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-11T19:00:00Z","group":"Grupo A"},
+    {"id":2,"homeTeam":{"name":"Sudáfrica"},"awayTeam":{"name":"Chequia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-11T22:00:00Z","group":"Grupo A"},
+    {"id":3,"homeTeam":{"name":"México"},"awayTeam":{"name":"Chequia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T19:00:00Z","group":"Grupo A"},
+    {"id":4,"homeTeam":{"name":"Corea del Sur"},"awayTeam":{"name":"Sudáfrica"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T22:00:00Z","group":"Grupo A"},
+    {"id":5,"homeTeam":{"name":"Chequia"},"awayTeam":{"name":"Corea del Sur"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-25T19:00:00Z","group":"Grupo A"},
+    {"id":6,"homeTeam":{"name":"Sudáfrica"},"awayTeam":{"name":"México"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-25T19:00:00Z","group":"Grupo A"},
+    # GRUPO B - Jun 12-26
+    {"id":7,"homeTeam":{"name":"Canadá"},"awayTeam":{"name":"Qatar"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-12T19:00:00Z","group":"Grupo B"},
+    {"id":8,"homeTeam":{"name":"Suiza"},"awayTeam":{"name":"Bosnia y Herz."},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-12T22:00:00Z","group":"Grupo B"},
+    {"id":9,"homeTeam":{"name":"Canadá"},"awayTeam":{"name":"Bosnia y Herz."},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T19:00:00Z","group":"Grupo B"},
+    {"id":10,"homeTeam":{"name":"Qatar"},"awayTeam":{"name":"Suiza"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T22:00:00Z","group":"Grupo B"},
+    # GRUPO C - Jun 12-26
+    {"id":11,"homeTeam":{"name":"Brasil"},"awayTeam":{"name":"Marruecos"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-13T19:00:00Z","group":"Grupo C"},
+    {"id":12,"homeTeam":{"name":"Haití"},"awayTeam":{"name":"Escocia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-13T22:00:00Z","group":"Grupo C"},
+    {"id":13,"homeTeam":{"name":"Brasil"},"awayTeam":{"name":"Escocia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-17T19:00:00Z","group":"Grupo C"},
+    {"id":14,"homeTeam":{"name":"Marruecos"},"awayTeam":{"name":"Haití"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-17T22:00:00Z","group":"Grupo C"},
+    # GRUPO D - Jun 12-26
+    {"id":15,"homeTeam":{"name":"EE.UU."},"awayTeam":{"name":"Paraguay"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-12T01:00:00Z","group":"Grupo D"},
+    {"id":16,"homeTeam":{"name":"Australia"},"awayTeam":{"name":"Turquía"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-13T01:00:00Z","group":"Grupo D"},
+    # GRUPO E - Jun 13-27
+    {"id":17,"homeTeam":{"name":"Alemania"},"awayTeam":{"name":"Curazao"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-14T01:00:00Z","group":"Grupo E"},
+    {"id":18,"homeTeam":{"name":"Costa de Marfil"},"awayTeam":{"name":"Ecuador"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-14T22:00:00Z","group":"Grupo E"},
+    # GRUPO F - Jun 14-28
+    {"id":19,"homeTeam":{"name":"Países Bajos"},"awayTeam":{"name":"Japón"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T01:00:00Z","group":"Grupo F"},
+    {"id":20,"homeTeam":{"name":"Túnez"},"awayTeam":{"name":"Suecia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-15T22:00:00Z","group":"Grupo F"},
+    # GRUPO G - Jun 15-29
+    {"id":21,"homeTeam":{"name":"Bélgica"},"awayTeam":{"name":"Egipto"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T01:00:00Z","group":"Grupo G"},
+    {"id":22,"homeTeam":{"name":"Irán"},"awayTeam":{"name":"Nueva Zelanda"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-16T22:00:00Z","group":"Grupo G"},
+    # GRUPO H - Jun 16-30
+    {"id":23,"homeTeam":{"name":"España"},"awayTeam":{"name":"Cabo Verde"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-17T01:00:00Z","group":"Grupo H"},
+    {"id":24,"homeTeam":{"name":"Arabia Saudita"},"awayTeam":{"name":"Uruguay"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-17T22:00:00Z","group":"Grupo H"},
+    # GRUPO I - Jun 17-Jul 1
+    {"id":25,"homeTeam":{"name":"Francia"},"awayTeam":{"name":"Senegal"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-18T01:00:00Z","group":"Grupo I"},
+    {"id":26,"homeTeam":{"name":"Noruega"},"awayTeam":{"name":"Irak"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-18T22:00:00Z","group":"Grupo I"},
+    # GRUPO J - Jun 18-Jul 2
+    {"id":27,"homeTeam":{"name":"Argentina"},"awayTeam":{"name":"Argelia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-19T01:00:00Z","group":"Grupo J"},
+    {"id":28,"homeTeam":{"name":"Austria"},"awayTeam":{"name":"Jordania"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-19T22:00:00Z","group":"Grupo J"},
+    # GRUPO K - Jun 19-Jul 3
+    {"id":29,"homeTeam":{"name":"Portugal"},"awayTeam":{"name":"Colombia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-20T01:00:00Z","group":"Grupo K"},
+    {"id":30,"homeTeam":{"name":"Uzbekistán"},"awayTeam":{"name":"RD Congo"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-20T22:00:00Z","group":"Grupo K"},
+    # GRUPO L - Jun 20-Jul 4
+    {"id":31,"homeTeam":{"name":"Inglaterra"},"awayTeam":{"name":"Croacia"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-21T01:00:00Z","group":"Grupo L"},
+    {"id":32,"homeTeam":{"name":"Ghana"},"awayTeam":{"name":"Panamá"},"score":{"fullTime":{"home":None,"away":None}},"status":{"short":"TIMED"},"utcDate":"2026-06-21T22:00:00Z","group":"Grupo L"},
 ]
+
+
 
 # ── HELPERS ────────────────────────────────────────────────────────────────────
 def form_score(team):
