@@ -373,7 +373,7 @@ select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.15)}
         </select>
         <button class="btn-add-leg" onclick="addLeg()">+ Agregar al parlay</button>
       </div>
-      <div class="inner-ttl">Selecciones ({{legs.length}})</div>
+      <div class="inner-ttl" id="legs-count">Selecciones (0)</div>
       <div class="legs-wrap" id="legs-wrap"><div class="legs-empty">Sin selecciones aún</div></div>
       <button class="btn-calc" id="btn-calc" onclick="calcParlay()" disabled>Calcular parlay ↗</button>
     </div>
@@ -723,6 +723,8 @@ function renderLegs(){
   const el=document.getElementById('legs-wrap');
   el.innerHTML = legs.length ? legs.map((l,i)=>`<div class="leg-item"><span class="leg-txt">${l.display}</span><button class="leg-del" onclick="rmLeg(${i})">✕</button></div>`).join('') : '<div class="legs-empty">Sin selecciones aún</div>';
   document.getElementById('btn-calc').disabled = legs.length<1;
+  const cnt=document.getElementById('legs-count');
+  if(cnt) cnt.textContent=`Selecciones (${legs.length})`;
 }
 
 function rmLeg(i){legs.splice(i,1);renderLegs();}
