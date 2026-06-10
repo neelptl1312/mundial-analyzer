@@ -13,14 +13,14 @@ GROUPS_DATA = {
     "B":["Canadá","Qatar","Suiza","Bosnia y Herz."],
     "C":["Brasil","Marruecos","Haití","Escocia"],
     "D":["EE.UU.","Paraguay","Australia","Turquía"],
-    "E":["Alemania","Ecuador","Costa de Marfil","Curazao"],
-    "F":["Países Bajos","Arabia Saudita","Uzbekistán","Noruega"],
-    "G":["Bélgica","Senegal","Egipto","Irán"],
-    "H":["España","Japón","Túnez","Irak"],
-    "I":["Francia","Colombia","Jordania","Uruguay"],
-    "J":["Argentina","Argelia","Austria","RD Congo"],
-    "K":["Portugal","Croacia","Ghana","Panamá"],
-    "L":["Inglaterra","Suecia","Cabo Verde","Australia"],
+    "E":["Alemania","Curazao","Costa de Marfil","Ecuador"],
+    "F":["Países Bajos","Japón","Túnez","Suecia"],
+    "G":["Bélgica","Egipto","Irán","Nueva Zelanda"],
+    "H":["España","Cabo Verde","Arabia Saudita","Uruguay"],
+    "I":["Francia","Senegal","Noruega","Irak"],
+    "J":["Argentina","Argelia","Austria","Jordania"],
+    "K":["Portugal","Colombia","Uzbekistán","RD Congo"],
+    "L":["Inglaterra","Croacia","Ghana","Panamá"],
 }
 
 FLAGS = {
@@ -100,6 +100,8 @@ STATS = {
     "Suecia":     {"atk":69,"def":68,"mid":70,"gf":1.5,"gc":1.1,"form":["W","D","W","W","D"],"cs":2,"cor":5.0,"yel":1.7},
     "Cabo Verde": {"atk":60,"def":60,"mid":59,"gf":1.0,"gc":1.3,"form":["D","W","L","D","W"],"cs":1,"cor":3.5,"yel":2.0},
     "Curazao":    {"atk":56,"def":55,"mid":55,"gf":0.8,"gc":1.6,"form":["L","D","L","W","D"],"cs":0,"cor":3.2,"yel":2.1},
+    "Nueva Zelanda":{"atk":62,"def":62,"mid":61,"gf":1.1,"gc":1.2,"form":["W","D","W","L","D"],"cs":1,"cor":4.0,"yel":1.8},
+    "Irak":        {"atk":61,"def":62,"mid":60,"gf":1.1,"gc":1.3,"form":["W","D","D","L","W"],"cs":1,"cor":3.7,"yel":2.2},
 }
 
 FALLBACK_MATCHES = [
