@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Mundial 2026 · Analyzer Pro</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -23,20 +20,17 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 #app{position:relative;z-index:1}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-/* SELECT2 DARK */
-.select2-container--default .select2-selection--single{background:var(--bg3);border:1px solid var(--border);border-radius:8px!important;height:40px}
-.select2-container--default .select2-selection--single .select2-selection__rendered{color:var(--text);line-height:40px;padding-left:12px;font-size:13px;font-family:'Inter',sans-serif}
-.select2-container--default .select2-selection--single .select2-selection__arrow{height:38px;right:6px}
-.select2-container--default .select2-selection--single .select2-selection__arrow b{border-color:var(--text3) transparent transparent}
-.select2-dropdown{background:var(--bg3);border:1px solid var(--border2);border-radius:12px!important;box-shadow:0 8px 32px rgba(0,0,0,.7);z-index:9999}
-.select2-container--default .select2-results__option{padding:9px 12px;font-size:13px;color:var(--text2);font-family:'Inter',sans-serif}
-.select2-container--default .select2-results__option--highlighted[aria-selected]{background:rgba(79,142,247,.2);color:var(--text)}
-.select2-container--default .select2-results__option[aria-selected=true]{background:rgba(79,142,247,.1);color:var(--blue)}
-.select2-search--dropdown{padding:8px;background:var(--bg3);border-bottom:1px solid var(--border)}
-.select2-search--dropdown .select2-search__field{background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;width:100%;font-family:'Inter',sans-serif;outline:none}
-.select2-container{width:100%!important}
-.select2-container--open .select2-selection--single{border-color:var(--blue)!important}
-.select2-results__options{max-height:250px}
+/* NATIVE SELECT MEJORADO */
+.search-select-wrap{position:relative;width:100%}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:.15s;cursor:text}
+.search-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+.search-input::placeholder{color:var(--text3)}
+.search-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.7);z-index:9999;max-height:260px;overflow-y:auto;display:none}
+.search-dropdown.open{display:block}
+.search-option{padding:9px 12px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:8px;transition:.1s}
+.search-option:hover,.search-option.focused{background:rgba(79,142,247,.15);color:var(--text)}
+.search-option.selected{background:rgba(79,142,247,.1);color:var(--blue)}
+.search-option img{width:22px;height:15px;border-radius:2px;object-fit:cover;flex-shrink:0}
 
 /* HEADER */
 header{background:rgba(5,5,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
@@ -502,13 +496,21 @@ window._PRE_TEAMS = 48;
     <div class="pk-box">
       <div class="pk-lbl">Local</div>
       <div class="pk-flag" id="hflag"><span style="font-size:28px">🏳️</span></div>
-      <select id="ph" onchange="upFlag('h')"></select>
+      <input type="hidden" id="ph-val">
+      <div class="search-select-wrap" id="wrap-ph">
+        <input type="text" class="search-input" id="inp-ph" placeholder="Buscar equipo local..." autocomplete="off">
+        <div class="search-dropdown" id="drop-ph"></div>
+      </div>
     </div>
     <div class="vs-c">VS</div>
     <div class="pk-box">
       <div class="pk-lbl">Visitante</div>
       <div class="pk-flag" id="aflag"><span style="font-size:28px">🏳️</span></div>
-      <select id="pa" onchange="upFlag('a')"></select>
+      <input type="hidden" id="pa-val">
+      <div class="search-select-wrap" id="wrap-pa">
+        <input type="text" class="search-input" id="inp-pa" placeholder="Buscar visitante..." autocomplete="off">
+        <div class="search-dropdown" id="drop-pa"></div>
+      </div>
     </div>
   </div>
   <button class="btn-analyze" id="btn-an" onclick="doAnalyze()">Analizar partido ↗</button>
@@ -525,8 +527,16 @@ window._PRE_TEAMS = 48;
     <div class="pl-card">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;margin-bottom:.875rem">Agregar selección</div>
       <div class="pb-form">
-        <select id="pl-h"></select>
-        <select id="pl-a"></select>
+        <input type="hidden" id="pl-h-val">
+        <div class="search-select-wrap" id="wrap-pl-h">
+          <input type="text" class="search-input" id="inp-pl-h" placeholder="Buscar local..." autocomplete="off">
+          <div class="search-dropdown"></div>
+        </div>
+        <input type="hidden" id="pl-a-val">
+        <div class="search-select-wrap" id="wrap-pl-a">
+          <input type="text" class="search-input" id="inp-pl-a" placeholder="Buscar visitante..." autocomplete="off">
+          <div class="search-dropdown"></div>
+        </div>
         <select id="pl-t">
           <option value="home_win">Local gana</option>
           <option value="away_win">Visitante gana</option>
@@ -814,6 +824,15 @@ async function init(){
 
   try {
     populateSels();
+    // Inicializar search selects
+    setTimeout(()=>{
+      try{
+        createSearchSelect('inp-ph','ph-val','Buscar local...');
+        createSearchSelect('inp-pa','pa-val','Buscar visitante...');
+        createSearchSelect('inp-pl-h','pl-h-val','Buscar local...');
+        createSearchSelect('inp-pl-a','pl-a-val','Buscar visitante...');
+      }catch(e){ console.warn('search select init:', e); }
+    }, 50);
   } catch(e) { console.error('populateSels error:', e); }
 
   try {
@@ -1108,37 +1127,66 @@ function populateSels(){
   document.getElementById('pa').innerHTML=opts;
   if(document.getElementById('pa').options.length>1) document.getElementById('pa').selectedIndex=1;
   // Selects de parlay
-  const pPre='<option value="">Equipo...</option>';
-  document.getElementById('pl-h').innerHTML=pPre+opts;
-  document.getElementById('pl-a').innerHTML=pPre+opts;
   upFlag('h'); upFlag('a');
-  // Inicializar select2
-  setTimeout(()=>{
-    if(typeof $.fn.select2 === 'undefined') return;
-    ['#ph','#pa','#pl-h','#pl-a'].forEach(id=>{
-      try{
-        $(id).select2({
-          placeholder: id==='#pl-h'||id==='#pl-a' ? 'Equipo...' : 'Seleccionar equipo',
-          minimumResultsForSearch: 0,
-          language:{ searching:()=>'Buscando...', noResults:()=>'Sin resultados' },
-          dropdownParent: $('body'),
-        });
-      }catch(e){}
+}
+
+// ── CUSTOM SEARCH SELECT (sin jQuery) ──────────────────────────────────────
+function createSearchSelect(inputId, hiddenId){
+  const input=document.getElementById(inputId);
+  const hidden=document.getElementById(hiddenId);
+  const wrap=input?.closest('.search-select-wrap');
+  if(!input||!hidden||!wrap) return;
+  let dd=wrap.querySelector('.search-dropdown');
+  if(!dd){dd=document.createElement('div');dd.className='search-dropdown';wrap.appendChild(dd);}
+  const sorted=[...allTeams].sort((a,b)=>a.team.localeCompare(b.team,'es'));
+
+  function renderOpts(q=''){
+    const filtered=sorted.filter(t=>!q||t.team.toLowerCase().includes(q.toLowerCase())).slice(0,50);
+    if(!filtered.length){dd.innerHTML='<div class="search-option" style="color:var(--text3);cursor:default">Sin resultados</div>';return;}
+    dd.innerHTML=filtered.map(t=>{
+      const fu=furl(t.team,44);
+      const sel=hidden.value===t.team?'selected':'';
+      return `<div class="search-option ${sel}" data-val="${t.team.replace(/"/g,'&quot;')}">${fu?`<img src="${fu}" alt="" width="22" height="15" style="border-radius:2px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">`:''}${t.team}</div>`;
+    }).join('');
+    dd.querySelectorAll('.search-option[data-val]').forEach(opt=>{
+      opt.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        const v=opt.dataset.val;
+        hidden.value=v; input.value=v;
+        dd.classList.remove('open');
+        if(hiddenId==='ph-val') upFlag('h');
+        if(hiddenId==='pa-val') upFlag('a');
+      });
     });
-    $('#ph').off('change.s2').on('change.s2',()=>upFlag('h'));
-    $('#pa').off('change.s2').on('change.s2',()=>upFlag('a'));
-  }, 100);
+  }
+
+  input.addEventListener('focus',()=>{renderOpts(input.value);dd.classList.add('open');});
+  input.addEventListener('input',()=>{renderOpts(input.value);dd.classList.add('open');});
+  input.addEventListener('blur',()=>{setTimeout(()=>dd.classList.remove('open'),200);});
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){dd.classList.remove('open');input.blur();}
+    if(e.key==='Enter'){const f=dd.querySelector('.search-option[data-val]');if(f)f.dispatchEvent(new MouseEvent('mousedown'));}
+  });
 }
 
 function getSelVal(id){
-  const el=document.getElementById(id);
-  if(!el) return '';
-  if(typeof $.fn.select2!=='undefined'&&$(('#'+id)).data('select2')) return $('#'+id).val()||'';
-  return el.value||'';
+  // Buscar hidden input del custom search select
+  const hidden = document.getElementById(id+'-val');
+  if(hidden) return hidden.value||'';
+  // Fallback select nativo
+  const el = document.getElementById(id);
+  return el?.value||'';
 }
 function setSelVal(id, val){
-  if(typeof $.fn.select2!=='undefined'&&$('#'+id).data('select2')){ $('#'+id).val(val).trigger('change'); }
-  else{ const el=document.getElementById(id); if(el) el.value=val; }
+  const hidden = document.getElementById(id+'-val');
+  if(hidden){
+    hidden.value = val;
+    const inp = document.getElementById('inp-'+id);
+    if(inp) inp.value = val;
+  } else {
+    const el = document.getElementById(id);
+    if(el) el.value = val;
+  }
 }
 
 function upFlag(side){
@@ -1236,7 +1284,7 @@ function addPickToParlay(h,a,type,label){
 // MATCH ANALYZE
 // =========================================================
 async function doAnalyze(){
-  const h=getSelVal('ph'), a=getSelVal('pa');
+  const h=getSelVal('ph'), a=getSelVal('pa');  // usa ph-val y pa-val internamente
   if(!h||!a||h===a){ toast('⚠️ Elige dos equipos distintos'); return; }
   const btn=document.getElementById('btn-an');
   btn.disabled=true; btn.textContent='Analizando...';
@@ -1325,7 +1373,7 @@ function renderResult(d){
 // PARLAY
 // =========================================================
 function addLeg(){
-  const h=getSelVal('pl-h'), a=getSelVal('pl-a');
+  const h=getSelVal('pl-h'), a=getSelVal('pl-a');  // usa pl-h-val y pl-a-val
   const t=document.getElementById('pl-t').value;
   const lbl=document.getElementById('pl-t').selectedOptions[0].text;
   if(!h||!a||h===a){ toast('⚠️ Elige dos equipos distintos'); return; }
