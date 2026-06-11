@@ -767,17 +767,33 @@ const LOCAL_STATS = {
 
 function buildLocalTeams(){
   const teams=[];
+  const PTS={"W":3,"D":1,"L":0};
+  const W=[0.35,0.25,0.20,0.12,0.08];
+  const WSUM=W.reduce((a,b)=>a+b,0);
   Object.entries(LOCAL_GROUPS).forEach(([grp,names])=>{
     names.forEach(name=>{
-      const fifa=LOCAL_FIFA[name]||1620;
-      const form=LOCAL_FORM[name]||["D","D","D","D","D"];
-      const st=LOCAL_STATS[name]||{atk:65,def:65,mid:65,gf:1.2,gc:1.2};
-      const pts={"W":3,"D":1,"L":0};
-      const w=[0.35,0.25,0.20,0.12,0.08];
-      const fs=Math.round((form.reduce((s,r,i)=>s+pts[r]*w[i],0)/(3*w.reduce((a,b)=>a+b,0)))*100);
-      teams.push({team:name,flag:FLAGS[name]||"🏳️",group:grp,fifa_rating:fifa,
-        form,form_score:fs,attack:st.atk,defense:st.def,midfield:st.mid,
-        avg_goals_scored:st.gf,avg_goals_conceded:st.gc,avg_corners:5.0,avg_yellow:2.0});
+      try {
+        const fifa=(LOCAL_FIFA&&LOCAL_FIFA[name])||1620;
+        const form=(LOCAL_FORM&&LOCAL_FORM[name])||["D","D","D","D","D"];
+        const st=(LOCAL_STATS&&LOCAL_STATS[name])||{atk:65,def:65,mid:65,gf:1.2,gc:1.2};
+        // form_score seguro
+        const fs=Math.min(100,Math.max(0,Math.round(
+          (form.slice(0,5).reduce((s,r,i)=>s+(PTS[r]||1)*W[i],0)/(3*WSUM))*100
+        )));
+        teams.push({
+          team:name, flag:(FLAGS&&FLAGS[name])||"🏳️", group:grp,
+          fifa_rating:fifa, form:form, form_score:fs,
+          attack:st.atk||65, defense:st.def||65, midfield:st.mid||65,
+          avg_goals_scored:st.gf||1.2, avg_goals_conceded:st.gc||1.2,
+          avg_corners:5.0, avg_yellow:2.0, clean_sheets:1, trend:"estable"
+        });
+      } catch(e) {
+        console.warn('Error building team '+name+':', e);
+        teams.push({team:name,flag:"🏳️",group:grp,fifa_rating:1620,
+          form:["D","D","D","D","D"],form_score:50,attack:65,defense:65,
+          midfield:65,avg_goals_scored:1.2,avg_goals_conceded:1.2,
+          avg_corners:5.0,avg_yellow:2.0});
+      }
     });
   });
   return teams.sort((a,b)=>b.fifa_rating-a.fifa_rating);
@@ -791,25 +807,41 @@ async function init(){
   history.replaceState({tab:curTab},'','#'+curTab);
 
   // PASO 1: Mostrar datos locales INMEDIATAMENTE (0ms de espera)
-  allTeams = buildLocalTeams();
-  renderTeams(allTeams);
-  populateSels();
-  renderGroups();
-  renderChamp();
-  document.getElementById('api-st').textContent='48 equipos';
+  try {
+    allTeams = buildLocalTeams();
+    renderTeams(allTeams);
+  } catch(e) { console.error('renderTeams error:', e); }
 
-  // Mostrar partidos del fallback inmediatamente también
-  liveMatches = buildLocalMatches();
-  processStats(); renderMatches();
+  try {
+    populateSels();
+  } catch(e) { console.error('populateSels error:', e); }
+
+  try {
+    renderGroups();
+  } catch(e) { console.error('renderGroups error:', e); }
+
+  try {
+    liveMatches = buildLocalMatches();
+    processStats();
+    renderMatches();
+  } catch(e) { console.error('renderMatches error:', e); }
+
+  try {
+    renderChamp();
+  } catch(e) { console.error('renderChamp error:', e); }
+
+  document.getElementById('api-st').textContent='48 equipos';
 
   // PASO 2: Wake-up ping al servidor (no bloqueante)
   wakeUpServer();
 
   // PASO 3: Actualizar con datos reales del servidor en background
-  setTimeout(loadServerData, 100);
+  setTimeout(loadServerData, 200);
 
   // Auto-refresh cada 60s
-  setInterval(()=>{ loadServerData(); },60000);
+  setInterval(()=>{ 
+    try { loadServerData(); } catch(e) {} 
+  }, 60000);
 }
 
 function buildLocalMatches(){
@@ -954,7 +986,8 @@ function processStats(){
 
 function renderMatches(){
   const el=document.getElementById('mscroll');
-  if(!liveMatches.length){ el.innerHTML='<div class="loader">No hay partidos disponibles</div>'; return; }
+  if(!el) return;
+  if(!liveMatches||!liveMatches.length){ el.innerHTML='<div class="loader">No hay partidos disponibles</div>'; return; }
   const sorted=[...liveMatches].sort((a,b)=>({live:0,scheduled:1,finished:2}[getSt(a)]-{live:0,scheduled:1,finished:2}[getSt(b)]));
   const tod=todayPA(), tom=tomorrowPA();
   el.innerHTML=sorted.slice(0,20).map(m=>{
@@ -1013,6 +1046,7 @@ function getGPts(team,grp){
 
 function renderGroups(){
   const el=document.getElementById('grids-wrap');
+  if(!el) return;
   el.innerHTML=Object.entries(GROUPS).map(([g,names])=>{
     const teams=names.map(n=>allTeams.find(t=>t.team===n)||{team:n,fifa_rating:1600,form:[]});
     teams.sort((a,b)=>{ const d=getGPts(b.team,g)-getGPts(a.team,g); return d!==0?d:(b.fifa_rating||1600)-(a.fifa_rating||1600); });
@@ -1359,8 +1393,12 @@ function calcChamp(){
   return pr;
 }
 function renderChamp(){
-  champProbs=calcChamp();
+  try { champProbs=calcChamp(); } catch(e){ champProbs={}; }
   const sorted=Object.entries(champProbs).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length){ 
+    document.getElementById('champ-body').innerHTML='<div style="text-align:center;color:var(--text3);padding:1rem;font-size:12px">Cargando pronóstico...</div>';
+    return;
+  }
   const top3=sorted.slice(0,3), rest=sorted.slice(3,8);
   const order=[top3[1],top3[0],top3[2]];
   const medals=['🥈','🥇','🥉'], colors=['#94a3b8','var(--yellow)','var(--orange)'], sizes=[[30,21],[38,26],[30,21]];
