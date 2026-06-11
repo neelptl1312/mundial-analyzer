@@ -386,7 +386,7 @@ select{background:var(--bg3);border:1px solid var(--border);color:var(--text);pa
     </nav>
     <div class="hdr-r">
       <div class="live-badge"><span class="live-dot"></span>LIVE</div>
-      <div class="api-st" id="api-st">Cargando...</div>
+      <div class="api-st" id="api-st" style="transition:color .3s">48 equipos</div>
       <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menú">
         <span></span><span></span><span></span>
       </button>
@@ -407,6 +407,12 @@ select{background:var(--bg3);border:1px solid var(--border);color:var(--text);pa
   <button class="mob-nb" id="mob-nb-bracket" onclick="goTabMob('bracket')">
     <span class="mob-nb-icon">🏆</span><span class="mob-nb-txt">Llaves del Mundial</span><span class="mob-nb-sub">Bracket · Pronóstico al campeón</span>
   </button>
+</div>
+
+<!-- WAKE UP BANNER - solo visible mientras servidor arranca -->
+<div id="wake-banner" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(249,115,22,.08));border-bottom:1px solid rgba(245,158,11,.2);padding:8px 1rem;text-align:center;font-size:12px;color:var(--yellow)">
+  <span class="spin" style="display:inline-block;width:12px;height:12px;border:2px solid rgba(245,158,11,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle"></span>
+  Servidor arrancando... Los datos locales están disponibles. Los datos en vivo llegarán en unos segundos.
 </div>
 
 <!-- TICKET BAR -->
@@ -715,46 +721,186 @@ window.addEventListener('unhandledrejection', e => {
   // No mostrar toast para errores menores
 });
 
+// ── DATOS LOCALES (carga instantánea sin servidor) ──────────────────────────
+// Copia de los datos del backend para carga inmediata
+const LOCAL_GROUPS = {
+  A:["México","Sudáfrica","Corea del Sur","Chequia"],B:["Canadá","Qatar","Suiza","Bosnia y Herz."],
+  C:["Brasil","Marruecos","Haití","Escocia"],D:["EE.UU.","Paraguay","Australia","Turquía"],
+  E:["Alemania","Curazao","Costa de Marfil","Ecuador"],F:["Países Bajos","Japón","Túnez","Suecia"],
+  G:["Bélgica","Egipto","Irán","Nueva Zelanda"],H:["España","Cabo Verde","Arabia Saudita","Uruguay"],
+  I:["Francia","Senegal","Noruega","Irak"],J:["Argentina","Argelia","Austria","Jordania"],
+  K:["Portugal","Colombia","Uzbekistán","RD Congo"],L:["Inglaterra","Croacia","Ghana","Panamá"],
+};
+const LOCAL_FIFA = {
+  "Argentina":1838,"Francia":1835,"España":1832,"Inglaterra":1814,"Brasil":1810,
+  "Portugal":1805,"Países Bajos":1798,"Bélgica":1795,"Alemania":1790,"Uruguay":1785,
+  "Marruecos":1775,"Japón":1770,"EE.UU.":1765,"México":1762,"Colombia":1758,
+  "Croacia":1755,"Senegal":1748,"Corea del Sur":1745,"Ecuador":1740,"Suiza":1738,
+  "Austria":1735,"Noruega":1730,"Turquía":1728,"Australia":1720,"Irán":1715,
+  "Egipto":1710,"Canadá":1708,"Paraguay":1705,"Ghana":1700,"Chequia":1698,
+  "Arabia Saudita":1695,"Escocia":1692,"Sudáfrica":1688,"Bosnia y Herz.":1685,
+  "Uzbekistán":1680,"Túnez":1678,"Argelia":1675,"RD Congo":1670,"Costa de Marfil":1668,
+  "Panamá":1662,"Qatar":1655,"Irak":1650,"Jordania":1645,"Haití":1640,
+  "Suecia":1638,"Cabo Verde":1620,"Curazao":1610,"Nueva Zelanda":1605,
+};
+const LOCAL_FORM = {
+  "Argentina":["W","W","W","D","W"],"Francia":["W","W","D","W","W"],"España":["W","W","W","W","D"],
+  "Inglaterra":["W","D","W","W","W"],"Brasil":["W","W","L","W","W"],"Portugal":["W","W","W","D","W"],
+  "Países Bajos":["W","D","W","W","D"],"Bélgica":["D","W","W","L","W"],"Alemania":["W","W","D","W","W"],
+  "Uruguay":["W","D","W","D","W"],"Marruecos":["W","W","D","W","D"],"Japón":["W","W","D","W","L"],
+  "EE.UU.":["W","W","D","W","D"],"México":["D","W","W","D","W"],"Colombia":["W","W","W","D","W"],
+  "Croacia":["D","W","D","W","W"],"Senegal":["W","D","W","W","D"],"Corea del Sur":["W","L","W","D","W"],
+};
+const LOCAL_STATS = {
+  "Argentina":{atk:92,def:84,mid:88,gf:2.4,gc:0.8},"Francia":{atk:91,def:86,mid:87,gf:2.2,gc:0.9},
+  "España":{atk:87,def:83,mid:90,gf:2.3,gc:0.7},"Inglaterra":{atk:85,def:82,mid:83,gf:2.0,gc:1.0},
+  "Brasil":{atk:88,def:80,mid:86,gf:2.1,gc:1.1},"Portugal":{atk:89,def:78,mid:82,gf:2.5,gc:1.2},
+  "Países Bajos":{atk:84,def:80,mid:83,gf:1.9,gc:1.0},"Bélgica":{atk:83,def:78,mid:82,gf:1.8,gc:1.1},
+  "Alemania":{atk:83,def:81,mid:84,gf:2.0,gc:1.0},"Uruguay":{atk:82,def:84,mid:79,gf:1.7,gc:0.8},
+  "Marruecos":{atk:76,def:82,mid:76,gf:1.5,gc:0.7},"EE.UU.":{atk:74,def:72,mid:74,gf:1.8,gc:1.2},
+};
+
+function buildLocalTeams(){
+  const teams=[];
+  Object.entries(LOCAL_GROUPS).forEach(([grp,names])=>{
+    names.forEach(name=>{
+      const fifa=LOCAL_FIFA[name]||1620;
+      const form=LOCAL_FORM[name]||["D","D","D","D","D"];
+      const st=LOCAL_STATS[name]||{atk:65,def:65,mid:65,gf:1.2,gc:1.2};
+      const pts={"W":3,"D":1,"L":0};
+      const w=[0.35,0.25,0.20,0.12,0.08];
+      const fs=Math.round((form.reduce((s,r,i)=>s+pts[r]*w[i],0)/(3*w.reduce((a,b)=>a+b,0)))*100);
+      teams.push({team:name,flag:FLAGS[name]||"🏳️",group:grp,fifa_rating:fifa,
+        form,form_score:fs,attack:st.atk,defense:st.def,midfield:st.mid,
+        avg_goals_scored:st.gf,avg_goals_conceded:st.gc,avg_corners:5.0,avg_yellow:2.0});
+    });
+  });
+  return teams.sort((a,b)=>b.fifa_rating-a.fifa_rating);
+}
+
 async function init(){
   const hash=location.hash.replace('#','');
   if(TABS.includes(hash)){ curTab=hash; TABS.forEach(n=>{ document.getElementById('tab-'+n)?.classList.toggle('on',n===hash); document.getElementById('nb-'+n)?.classList.toggle('on',n===hash); }); }
   history.replaceState({tab:curTab},'','#'+curTab);
-  try{
-    const [sr,tr]=await Promise.all([fetch(API+'/api/status'),fetch(API+'/api/teams')]);
-    const s=await sr.json();
-    document.getElementById('api-st').textContent=s.teams_loaded+' equipos';
-    allTeams=await tr.json();
-    renderTeams(allTeams);
-    populateSels();
-  }catch(e){
-    document.getElementById('api-st').textContent='Error API';
-    document.getElementById('tgrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--red)">
-      <div style="font-size:32px;margin-bottom:8px">⚠️</div>
-      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:4px">Error de conexión</div>
-      <div style="font-size:12px;color:var(--text3)">No se pudo conectar al servidor. <button onclick="init()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:12px;text-decoration:underline">Reintentar</button></div>
-    </div>`;
-  }
-  await loadMatches();
+
+  // PASO 1: Mostrar datos locales INMEDIATAMENTE (0ms de espera)
+  allTeams = buildLocalTeams();
+  renderTeams(allTeams);
+  populateSels();
   renderGroups();
-  if(allTeams.length) renderChamp();
-  setInterval(()=>{ loadMatches().then(()=>{ if(allTeams.length) renderChamp(); }); },60000);
+  renderChamp();
+  document.getElementById('api-st').textContent='48 equipos';
+
+  // Mostrar partidos del fallback inmediatamente también
+  liveMatches = buildLocalMatches();
+  processStats(); renderMatches();
+
+  // PASO 2: Wake-up ping al servidor (no bloqueante)
+  wakeUpServer();
+
+  // PASO 3: Actualizar con datos reales del servidor en background
+  setTimeout(loadServerData, 100);
+
+  // Auto-refresh cada 60s
+  setInterval(()=>{ loadServerData(); },60000);
+}
+
+function buildLocalMatches(){
+  // Partidos de hoy y mañana del Mundial (hardcoded para carga instantánea)
+  const tod=todayPA(), tom=tomorrowPA();
+  const allM = [
+    {id:1,homeTeam:{name:"México"},awayTeam:{name:"Corea del Sur"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-11T19:00:00Z",group:"Grupo A"},
+    {id:2,homeTeam:{name:"Sudáfrica"},awayTeam:{name:"Chequia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-11T22:00:00Z",group:"Grupo A"},
+    {id:7,homeTeam:{name:"Canadá"},awayTeam:{name:"Qatar"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-12T19:00:00Z",group:"Grupo B"},
+    {id:8,homeTeam:{name:"Suiza"},awayTeam:{name:"Bosnia y Herz."},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-12T22:00:00Z",group:"Grupo B"},
+    {id:19,homeTeam:{name:"EE.UU."},awayTeam:{name:"Paraguay"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-12T01:00:00Z",group:"Grupo D"},
+    {id:13,homeTeam:{name:"Brasil"},awayTeam:{name:"Marruecos"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-13T19:00:00Z",group:"Grupo C"},
+    {id:14,homeTeam:{name:"Haití"},awayTeam:{name:"Escocia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-13T22:00:00Z",group:"Grupo C"},
+    {id:20,homeTeam:{name:"Australia"},awayTeam:{name:"Turquía"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-13T01:00:00Z",group:"Grupo D"},
+    {id:25,homeTeam:{name:"Alemania"},awayTeam:{name:"Curazao"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-14T01:00:00Z",group:"Grupo E"},
+    {id:26,homeTeam:{name:"Costa de Marfil"},awayTeam:{name:"Ecuador"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-14T22:00:00Z",group:"Grupo E"},
+    {id:31,homeTeam:{name:"Países Bajos"},awayTeam:{name:"Japón"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T01:00:00Z",group:"Grupo F"},
+    {id:32,homeTeam:{name:"Túnez"},awayTeam:{name:"Suecia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T22:00:00Z",group:"Grupo F"},
+  ];
+  return allM;
+}
+
+// Ping para despertar Render sin bloquear la UI
+function wakeUpServer(){
+  const st=document.getElementById('api-st');
+  const banner=document.getElementById('wake-banner');
+  // Mostrar banner si tarda más de 2 segundos
+  const bannerTimer=setTimeout(()=>{ if(banner) banner.style.display='block'; },2000);
+  fetch(API+'/api/status',{method:'GET',cache:'no-cache'})
+    .then(r=>r.json())
+    .then(d=>{
+      clearTimeout(bannerTimer);
+      if(banner) banner.style.display='none';
+      st.textContent=d.teams_loaded+' equipos';
+      st.style.color='var(--green)';
+      setTimeout(()=>{ st.style.color=''; },3000);
+    })
+    .catch(()=>{
+      clearTimeout(bannerTimer);
+      if(banner) banner.style.display='none';
+      st.textContent='Datos locales';
+      st.style.color='var(--text3)';
+    });
+}
+
+async function loadServerData(){
+  try{
+    // Cargar equipos y partidos en paralelo
+    const [tr,mr]=await Promise.all([
+      fetch(API+'/api/teams',{cache:'no-cache'}),
+      fetch(API+'/api/matches/live',{cache:'no-cache'})
+    ]);
+    if(tr.ok){
+      const serverTeams=await tr.json();
+      if(Array.isArray(serverTeams)&&serverTeams.length>0){
+        allTeams=serverTeams;
+        renderTeams(allTeams);
+        populateSels();
+        renderGroups();
+      }
+    }
+    if(mr.ok){
+      const serverMatches=await mr.json();
+      if(Array.isArray(serverMatches)&&serverMatches.length>0){
+        liveMatches=serverMatches;
+        processStats(); renderMatches();
+      }
+    }
+    renderChamp();
+  }catch(e){
+    // Datos locales ya visibles, sin crash
+    console.log('Server no disponible, usando datos locales');
+  }
 }
 
 // =========================================================
 // MATCHES
 // =========================================================
+// loadMatches - actualiza desde servidor sin borrar datos actuales
 async function loadMatches(){
   try{
-    const r=await fetch(API+'/api/matches/live');
-    liveMatches=await r.json();
-    if(!Array.isArray(liveMatches)) liveMatches=[];
+    const r=await fetch(API+'/api/matches/live',{cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    if(Array.isArray(data)&&data.length>0){
+      liveMatches=data;
+    }
     processStats(); renderMatches();
   }catch(e){
-    document.getElementById('mscroll').innerHTML=`<div class="loader" style="flex-direction:column;gap:8px;color:var(--red)">
-      <span style="font-size:24px">📡</span>
-      <span>Sin conexión a la API de partidos</span>
-      <button onclick="loadMatches()" style="background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:var(--blue);border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">↻ Reintentar</button>
-    </div>`;
+    // Si falla, solo re-renderizar con lo que ya hay
+    if(liveMatches.length) { processStats(); renderMatches(); }
+    else {
+      document.getElementById('mscroll').innerHTML=`<div class="loader" style="flex-direction:column;gap:8px;color:var(--text3)">
+        <span style="font-size:24px">📡</span>
+        <span style="font-size:12px">Actualizando partidos...</span>
+        <button onclick="loadMatches()" style="background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:var(--blue);border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">↻ Reintentar</button>
+      </div>`;
+    }
   }
 }
 function getSt(m){ const s=m.status?.short||m.status?.type||m.status||''; if(['1H','HT','2H','ET','P','LIVE','IN_PLAY'].includes(s))return'live'; if(['FT','AET','PEN','FINISHED'].includes(s))return'finished'; return'scheduled'; }
