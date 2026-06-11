@@ -677,7 +677,7 @@ function toast(msg,dur=2500){
 }
 
 // =========================================================
-// TABS — menú hamburguesa + desktop nav
+// TABS -- menú hamburguesa + desktop nav
 // =========================================================
 const TABS = ['dashboard','match','parlay','bracket'];
 let curTab = 'dashboard';
@@ -956,16 +956,15 @@ async function loadMatches(){
     if(liveMatches.length) { processStats(); renderMatches(); }
     else {
       document.getElementById('mscroll').innerHTML=`<div class="loader" style="flex-direction:column;gap:8px;color:var(--text3)">
-        <span style="font-size:24px">📡</span>
+        <span style="font-size:24px"></span>
         <span style="font-size:12px">Actualizando partidos...</span>
-        <button onclick="loadMatches()" style="background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:var(--blue);border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">↻ Reintentar</button>
-      </div>`;
+        <button onclick="loadMatches()" style="background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:var(--blue);border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">R Reintentar</button>
     }
   }
 }
 function getSt(m){ const s=m.status?.short||m.status?.type||m.status||''; if(['1H','HT','2H','ET','P','LIVE','IN_PLAY'].includes(s))return'live'; if(['FT','AET','PEN','FINISHED'].includes(s))return'finished'; return'scheduled'; }
 function getTime(m){ const s=m.status?.short||m.status||''; if(m.status?.elapsed)return m.status.elapsed+"'"; if(s==='HT')return'½T'; if(['FT','FINISHED','AET','PEN'].includes(s))return'FT'; const d=m.utcDate||m.fixture?.date||''; return d?toPT(d):s; }
-function getScore(m){ const h=m.score?.fullTime?.home??m.goals?.home??null,a=m.score?.fullTime?.away??m.goals?.away??null; return{h:h!=null?h:'—',a:a!=null?a:'—'}; }
+function getScore(m){ const h=m.score?.fullTime?.home??m.goals?.home??null,a=m.score?.fullTime?.away??m.goals?.away??null; return{h:h!=null?h:'--',a:a!=null?a:'--'}; }
 function getTeams(m){ return{h:nes(m.homeTeam?.name||m.teams?.home?.name||'Local'),a:nes(m.awayTeam?.name||m.teams?.away?.name||'Visitante')}; }
 
 // Cache de goles para detectar nuevos goles
@@ -985,21 +984,21 @@ function processStats(){
     if(md===tod) todayCnt++;
     else if(md===tom) tomCnt++;
   });
-  document.getElementById('m-g').textContent=g||'—';
-  document.getElementById('m-p').textContent=p||'—';
+  document.getElementById('m-g').textContent=g||'--';
+  document.getElementById('m-p').textContent=p||'--';
   document.getElementById('m-l').textContent=l;
-  // Mostrar "X hoy · Y mañana" o solo uno si el otro es 0
+  // Mostrar "X hoy . Y mañana" o solo uno si el otro es 0
   const parts=[];
   if(todayCnt>0) parts.push(todayCnt+' hoy');
   if(tomCnt>0) parts.push(tomCnt+' mañana');
-  document.getElementById('m-t').textContent=parts.length?parts.join(' · '):'—';
+  document.getElementById('m-t').textContent=parts.length?parts.join(' . '):'--';
   // Detectar nuevo gol → efecto visual
   if(g > _prevGoals && _prevGoals > 0){
     const el=document.getElementById('m-g');
     el.style.color='var(--yellow)';
     el.style.transform='scale(1.3)';
     setTimeout(()=>{el.style.color='';el.style.transform='';},1500);
-    toast('⚽ ¡Gol en el Mundial!');
+    toast(' ¡Gol en el Mundial!');
   }
   _prevGoals = g;
   document.getElementById('lv-ct').textContent=l>0?l+' live':'0 live';
@@ -1018,7 +1017,7 @@ function renderMatches(){
     const dt=m.utcDate?toPD(m.utcDate):'';
     const md=m.utcDate?msPA(m.utcDate):'';
     let badge;
-    if(st==='live') badge='<span class="badge b-live">⚡ LIVE</span>';
+    if(st==='live') badge='<span class="badge b-live"> LIVE</span>';
     else if(st==='finished') badge='<span class="badge b-fin">FT</span>';
     else if(md===tod) badge='<span class="badge b-hoy">HOY</span>';
     else if(md===tom) badge='<span class="badge b-man">MAÑANA</span>';
@@ -1037,17 +1036,16 @@ function renderMatches(){
           ${hf?`<img src="${hf}" class="mc-fi" alt="${hName}" onerror="this.src='';this.style.fontSize='22px';this.outerHTML='🏳️'">`:'<span style="font-size:22px">🏳️</span>'}
           <div class="mc-nm">${hName.length>12?hName.split(' ')[0]:hName}</div>
         </div>
-        <div class="mc-sb"><div class="mc-sc">${sc.h}–${sc.a}</div><div class="mc-ss">${st==='finished'?'Final':st==='live'?'Live':'vs'}</div></div>
+        <div class="mc-sb"><div class="mc-sc">${sc.h}-${sc.a}</div><div class="mc-ss">${st==='finished'?'Final':st==='live'?'Live':'vs'}</div></div>
         <div class="mc-team">
           ${af?`<img src="${af}" class="mc-fi" alt="${aName}" onerror="this.src='';this.style.fontSize='22px';this.outerHTML='🏳️'">`:'<span style="font-size:22px">🏳️</span>'}
           <div class="mc-nm">${aName.length>12?aName.split(' ')[0]:aName}</div>
         </div>
       </div>
       <div style="display:flex;gap:5px">
-        <button class="mc-abtn" style="flex:2" onclick="analyzeFromMatch('${hEsc}','${aEsc}')">🔍 Analizar ↗</button>
+        <button class="mc-abtn" style="flex:2" onclick="analyzeFromMatch('${hEsc}','${aEsc}')"> Analizar ></button>
         <button class="mc-abtn" style="flex:1;background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--green)" onclick="quickAddParlay('${hEsc}','${aEsc}')">+ Parlay</button>
       </div>
-    </div>`;
   }).join('');
 }
 
@@ -1079,13 +1077,12 @@ function renderGroups(){
           const fu=furl(t.team,40);
           const pts=getGPts(t.team,g);
           return `<tr class="g-tr" onclick="analyzeTeam('${t.team}')">
-            <td class="g-td"><span class="pos-b p${i+1}">${i+1}</span>${fu?`<img src="${fu}" class="g-fi" alt="${t.team}" onerror="this.style.display='none'">`:''}<span class="g-nm">${t.team}</span></td>
+            <td class="g-td"><span class="pos-b p${i+1}">${i+1}</span>${fu?`<img src="${fu}" class="g-fi" alt="${t.team}" onerror="this.setAttribute('style','display:none')">`:''}<span class="g-nm">${t.team}</span></td>
             <td class="g-td"><span class="g-pts">${pts}</span></td>
             <td class="g-td"><div class="fm">${(t.form||[]).slice(-3).map(r=>`<div class="fb ${r}">${r}</div>`).join('')}</div></td>
           </tr>`;
         }).join('')}
       </table>
-    </div>`;
   }).join('');
 }
 
@@ -1100,7 +1097,7 @@ function renderTeams(teams){
     const fu=furl(t.team,64);
     return `<div class="tc" onclick="analyzeTeam('${t.team}')">
       <div class="tc-top">
-        ${fu?`<img src="${fu}" class="tc-fi" alt="${t.team}" onerror="this.style.display='none'">`:'<span style="font-size:22px">🏳️</span>'}
+        ${fu?`<img src="${fu}" class="tc-fi" alt="${t.team}" onerror="this.setAttribute('style','display:none')">`:'<span style="font-size:22px">🏳️</span>'}
         <div><div class="tc-nm">${t.team}</div><div class="tc-meta"><span class="grp-p">G${t.group}</span><span style="color:${fc(t.form_score)}">${t.form_score}</span></div></div>
       </div>
       <div class="form-row">${(t.form||[]).map(r=>`<div class="fb ${r}" style="width:20px;height:20px;font-size:9px">${r}</div>`).join('')}</div>
@@ -1108,7 +1105,6 @@ function renderTeams(teams){
       <div class="sr"><span class="sl">Def</span><div class="st"><div class="sf s-p" style="width:${t.defense||0}%"></div></div><span class="sn">${t.defense}</span></div>
       <div class="sr"><span class="sl">Med</span><div class="st"><div class="sf s-g" style="width:${t.midfield||0}%"></div></div><span class="sn">${t.midfield}</span></div>
       <div class="tc-foot"><span>FIFA ${t.fifa_rating}</span><span class="xg-p">${t.avg_goals_scored} xG</span></div>
-    </div>`;
   }).join('');
 }
 function filterT(){
@@ -1148,7 +1144,7 @@ function createSearchSelect(inputId, hiddenId){
     dd.innerHTML=filtered.map(t=>{
       const fu=furl(t.team,44);
       const sel=hidden.value===t.team?'selected':'';
-      return `<div class="search-option ${sel}" data-val="${t.team.replace(/"/g,'&quot;')}">${fu?`<img src="${fu}" alt="" width="22" height="15" style="border-radius:2px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">`:''}${t.team}</div>`;
+      return `<div class="search-option ${sel}" data-val="${t.team.replace(/"/g,'&quot;')}">${fu?`<img src="${fu}" alt="" width="22" height="15" style="border-radius:2px;object-fit:cover;flex-shrink:0" onerror="this.setAttribute('style','display:none')">`:''}${t.team}</div>`;
     }).join('');
     dd.querySelectorAll('.search-option[data-val]').forEach(opt=>{
       opt.addEventListener('mousedown',e=>{
@@ -1228,7 +1224,7 @@ function quickAddParlay(h,a){
     || allTeams.find(t=>name.toLowerCase().startsWith(t.team.toLowerCase().split(' ')[0]))
     || allTeams.find(t=>nes(name)===t.team);
   const hT=findT(h), aT=findT(a);
-  if(!hT||!aT){ toast('⚠️ No se encontraron los equipos'); return; }
+  if(!hT||!aT){ toast('(!) No se encontraron los equipos'); return; }
   // Mostrar mini modal para elegir el tipo de pick
   showQuickPickModal(hT.team, aT.team);
 }
@@ -1270,16 +1266,15 @@ function showQuickPickModal(h,a){
               <span style="font-size:11px;color:var(--text3);margin-left:6px">${p.odds}x</span>
             </div>
           </button>`).join('')}
-        </div>`;
       document.getElementById('ai-modal').classList.add('show');
     })
-    .catch(()=>toast('❌ Error cargando probabilidades'));
+    .catch(()=>toast('Error Error cargando probabilidades'));
 }
 
 function addPickToParlay(h,a,type,label){
-  legs.push({home:h,away:a,pick_type:type,display:`${h} vs ${a} · ${label}`});
+  legs.push({home:h,away:a,pick_type:type,display:`${h} vs ${a} . ${label}`});
   renderLegs();
-  toast(`✓ Agregado: ${label}`);
+  toast(`OK Agregado: ${label}`);
 }
 
 // =========================================================
@@ -1287,7 +1282,7 @@ function addPickToParlay(h,a,type,label){
 // =========================================================
 async function doAnalyze(){
   const h=getSelVal('ph'), a=getSelVal('pa');  // usa ph-val y pa-val internamente
-  if(!h||!a||h===a){ toast('⚠️ Elige dos equipos distintos'); return; }
+  if(!h||!a||h===a){ toast('(!) Elige dos equipos distintos'); return; }
   const btn=document.getElementById('btn-an');
   btn.disabled=true; btn.textContent='Analizando...';
   const rw=document.getElementById('rw');
@@ -1297,78 +1292,121 @@ async function doAnalyze(){
     const r=await fetch(`${API}/api/match/analyze?home=${encodeURIComponent(h)}&away=${encodeURIComponent(a)}`);
     const d=await r.json();
     renderResult(d);
+    // Renderizar value bets por separado (evita backticks anidados)
+    if(d.value_bets && d.value_bets.length) renderValueBets(d.home, d.away, d.value_bets);
   }catch(e){ rw.innerHTML='<div class="loader" style="color:var(--red)">Error al analizar</div>'; }
-  finally{ btn.disabled=false; btn.textContent='Analizar partido ↗'; }
+  finally{ btn.disabled=false; btn.textContent='Analizar partido >'; }
 }
 function pc(p){ return p>=65?'hi':p>=45?'mi':'lo'; }
+function prefillFromData(el){ prefill(decodeURIComponent(el.dataset.h),decodeURIComponent(el.dataset.a),el.dataset.t); }
+function prefillAllFromData(el){ prefillAll(decodeURIComponent(el.dataset.h),decodeURIComponent(el.dataset.a)); }
+function showH2HFromData(el){ showH2H(decodeURIComponent(el.dataset.h),decodeURIComponent(el.dataset.a)); }
+
+function renderValueBets(home, away, vbets){
+  if(!vbets||!vbets.length) return;
+  const key = (home+away).replace(/ /g,'');
+  const el = document.getElementById('vb-section-'+key);
+  if(!el) return;
+  let html = '<div class="inner" style="margin-top:1rem;border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.05),var(--bg3))">';
+  html += '<div class="in-ttl" style="color:var(--yellow)">Value Bets detectados</div>';
+  html += '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Mercados donde nuestro modelo supera la cuota del mercado</div>';
+  vbets.forEach(function(v){
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,30,50,.8)">';
+    html += '<div><div style="font-size:12px;font-weight:700;color:#fff">'+v.label+'</div>';
+    html += '<div style="font-size:10px;color:var(--text3);margin-top:2px">Cuota: '+v.market_odds+'x - Prob implícita: '+v.implied_prob+'%</div></div>';
+    html += '<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--yellow)">'+v.verdict+'</div>';
+    html += '<div style="font-size:11px;color:var(--green);font-family:monospace">+'+v.edge+'% edge</div></div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
 function renderResult(d){
-  const top6=Object.entries(d.score_matrix||{}).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const hf=furl(d.home,80), af=furl(d.away,80);
-  document.getElementById('rw').innerHTML=`
-    <div class="scoreline">
-      <div class="sl-teams">
-        ${hf?`<img src="${hf}" style="width:30px;height:21px;border-radius:4px;object-fit:cover" alt="${d.home}" onerror="this.style.display='none'">`:''}
-        ${d.home} <span style="color:var(--text3);font-weight:300">vs</span>
-        ${af?`<img src="${af}" style="width:30px;height:21px;border-radius:4px;object-fit:cover" alt="${d.away}" onerror="this.style.display='none'">`:''}
-        ${d.away}
-      </div>
-      <div class="sl-sub">Modelo xG + Poisson · Zona horaria Panamá</div>
-      <div class="sl-chip">⚽ Resultado más probable: <strong>${d.most_likely_score}</strong></div>
-    </div>
-    <div class="prob-3">
-      <div class="pcard pc-w"><div class="pc-lbl">${d.home} gana</div><div class="pc-val">${d.home_win_prob}%</div><div class="pc-bar" style="width:${d.home_win_prob}%"></div></div>
-      <div class="pcard pc-d"><div class="pc-lbl">Empate</div><div class="pc-val">${d.draw_prob}%</div><div class="pc-bar" style="width:${d.draw_prob}%"></div></div>
-      <div class="pcard pc-l"><div class="pc-lbl">${d.away} gana</div><div class="pc-val">${d.away_win_prob}%</div><div class="pc-bar" style="width:${d.away_win_prob}%"></div></div>
-    </div>
-    <div class="s2">
-      <div class="inner">
-        <div class="in-ttl">Goles esperados (xG)</div>
-        <div class="xg-big">
-          <div class="xg-blk">${hf?`<img src="${hf}" style="width:36px;height:25px;border-radius:4px;object-fit:cover;margin-bottom:4px" alt="${d.home}" onerror="this.style.display='none'">`:''}<div class="xg-n" style="color:var(--blue)">${d.home_xg}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${d.home}</div></div>
-          <div style="color:var(--text3);font-size:16px">—</div>
-          <div class="xg-blk">${af?`<img src="${af}" style="width:36px;height:25px;border-radius:4px;object-fit:cover;margin-bottom:4px" alt="${d.away}" onerror="this.style.display='none'">`:''}<div class="xg-n" style="color:var(--purple)">${d.away_xg}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${d.away}</div></div>
-        </div>
-        <div class="in-ttl" style="margin-top:10px">Forma reciente</div>
-        <div style="display:flex;justify-content:space-between;margin-top:5px">
-          <div class="fm">${(d.home_form||[]).map(r=>`<div class="fb ${r}" style="width:20px;height:20px;font-size:9px">${r}</div>`).join('')}</div>
-          <div class="fm">${(d.away_form||[]).map(r=>`<div class="fb ${r}" style="width:20px;height:20px;font-size:9px">${r}</div>`).join('')}</div>
-        </div>
-      </div>
-      <div class="inner">
-        <div class="in-ttl">Mercados</div>
-        ${[['Más de 1.5 goles',d.over_15],['Más de 2.5 goles',d.over_25],['Más de 3.5 goles',d.over_35],['Ambos anotan',d.btts],['Más de 9 corners',d.over_9_corners],['Más de 3 amarillas',d.over_3_yellow]].map(([l,v])=>`<div class="mkt"><span class="mkt-n">${l}</span><span class="mkt-v ${pc(v)}">${v}%</span></div>`).join('')}
-      </div>
-    </div>
-    <div class="s2">
-      <div class="inner">
-        <div class="in-ttl">Mejores picks</div>
-        <div class="picks-list">${(d.best_picks||[]).map(p=>`<div class="pick-r" onclick="prefill('${d.home}','${d.away}','${p.pick_type}')"><span class="pr-nm">${p.label}</span><div class="pr-r"><span class="pr-pct">${p.probability}%</span><span class="pr-od">${p.decimal_odds}x</span></div></div>`).join('')}</div>
-      </div>
-      <div class="inner">
-        <div class="in-ttl">Marcadores más probables</div>
-        <div class="scores-w">${top6.map(([s,p],i)=>`<div class="sc ${i===0?'t1':i<=2?'t2':''}">${s}<span class="sc-pct">${p}%</span></div>`).join('')}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:8px">~${d.corners_expected} corners · ~${d.yellows_expected} amarillas</div>
-      </div>
-    </div>
-    ${(d.value_bets&&d.value_bets.length)?`
-    <div class="inner" style="margin-top:1rem;border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.05),var(--bg3))">
-      <div class="in-ttl" style="color:var(--yellow)">💰 Value Bets detectados</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Mercados donde nuestro modelo supera la probabilidad implícita de las casas</div>
-      ${d.value_bets.map(v=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,30,50,.8)">
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#fff">${v.label}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">Cuota mercado: ${v.market_odds}x · Prob implícita: ${v.implied_prob}%</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:13px;font-weight:800;color:var(--yellow)">${v.verdict}</div>
-          <div style="font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace">+${v.edge}% edge</div>
-        </div>
-      </div>`).join("")}
-    </div>`:""}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem">
-      <button class="add-parlay" onclick="prefillAll('${d.home}','${d.away}')">+ Agregar al Parlay</button>
-      <button class="add-parlay" style="background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.3);color:var(--blue)" onclick="showH2H('${d.home}','${d.away}')">📊 H2H</button>
-    </div>\`;
+  var rw=document.getElementById('rw');
+  var top6=Object.entries(d.score_matrix||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  var hf=furl(d.home,80), af=furl(d.away,80);
+  var htm=[];
+  function a(s){ htm.push(s); }
+
+  // Header
+  a('<div class="scoreline">');
+  a('<div class="sl-teams">');
+  if(hf) a('<img src="'+hf+'" style="width:30px;height:21px;border-radius:4px;object-fit:cover" alt="">');
+  a(' '+d.home+' <span style="color:var(--text3);font-weight:300">vs</span> ');
+  if(af) a('<img src="'+af+'" style="width:30px;height:21px;border-radius:4px;object-fit:cover" alt="">');
+  a(' '+d.away+'</div>');
+  a('<div class="sl-sub">Modelo xG + Poisson</div>');
+  a('<div class="sl-chip">Resultado mas probable: <strong>'+d.most_likely_score+'</strong></div></div>');
+
+  // Probs
+  a('<div class="prob-3">');
+  a('<div class="pcard pc-w"><div class="pc-lbl">'+d.home+' gana</div><div class="pc-val">'+d.home_win_prob+'%</div><div class="pc-bar" style="width:'+d.home_win_prob+'%"></div></div>');
+  a('<div class="pcard pc-d"><div class="pc-lbl">Empate</div><div class="pc-val">'+d.draw_prob+'%</div><div class="pc-bar" style="width:'+d.draw_prob+'%"></div></div>');
+  a('<div class="pcard pc-l"><div class="pc-lbl">'+d.away+' gana</div><div class="pc-val">'+d.away_win_prob+'%</div><div class="pc-bar" style="width:'+d.away_win_prob+'%"></div></div>');
+  a('</div>');
+
+  // Stats
+  a('<div class="s2">');
+  a('<div class="inner"><div class="in-ttl">Goles esperados (xG)</div><div class="xg-big">');
+  a('<div class="xg-blk">');
+  if(hf) a('<img src="'+hf+'" style="width:36px;height:25px;border-radius:4px;object-fit:cover;margin-bottom:4px" alt="">');
+  a('<div class="xg-n" style="color:var(--blue)">'+d.home_xg+'</div>');
+  a('<div style="font-size:10px;color:var(--text3);margin-top:2px">'+d.home+'</div></div>');
+  a('<div style="color:var(--text3);font-size:16px">-</div>');
+  a('<div class="xg-blk">');
+  if(af) a('<img src="'+af+'" style="width:36px;height:25px;border-radius:4px;object-fit:cover;margin-bottom:4px" alt="">');
+  a('<div class="xg-n" style="color:var(--purple)">'+d.away_xg+'</div>');
+  a('<div style="font-size:10px;color:var(--text3);margin-top:2px">'+d.away+'</div></div>');
+  a('</div>');
+  a('<div class="in-ttl" style="margin-top:10px">Forma reciente</div>');
+  a('<div style="display:flex;justify-content:space-between;margin-top:5px">');
+  a('<div class="fm">'+(d.home_form||[]).map(function(r){return '<div class="fb '+r+'" style="width:20px;height:20px;font-size:9px">'+r+'</div>';}).join('')+'</div>');
+  a('<div class="fm">'+(d.away_form||[]).map(function(r){return '<div class="fb '+r+'" style="width:20px;height:20px;font-size:9px">'+r+'</div>';}).join('')+'</div>');
+  a('</div></div>');
+  // Mercados
+  a('<div class="inner"><div class="in-ttl">Mercados</div>');
+  [['Mas de 1.5 goles',d.over_15],['Mas de 2.5 goles',d.over_25],['Mas de 3.5 goles',d.over_35],['Ambos anotan',d.btts],['Mas de 9 corners',d.over_9_corners],['Mas de 3 amarillas',d.over_3_yellow]].forEach(function(pair){
+    a('<div class="mkt"><span class="mkt-n">'+pair[0]+'</span><span class="mkt-v '+pc(pair[1])+'">'+pair[1]+'%</span></div>');
+  });
+  a('</div></div>');
+
+  // Picks y marcadores
+  a('<div class="s2">');
+  a('<div class="inner"><div class="in-ttl">Mejores picks</div><div class="picks-list">');
+  (d.best_picks||[]).forEach(function(p){
+    a('<div class="pick-r" data-h="'+encodeURIComponent(d.home)+'" data-a="'+encodeURIComponent(d.away)+'" data-t="'+p.pick_type+'" onclick="prefillFromData(this)">');
+    a('<span class="pr-nm">'+p.label+'</span>');
+    a('<div class="pr-r"><span class="pr-pct">'+p.probability+'%</span><span class="pr-od">'+p.decimal_odds+'x</span></div></div>');
+  });
+  a('</div></div>');
+  a('<div class="inner"><div class="in-ttl">Marcadores mas probables</div><div class="scores-w">');
+  top6.forEach(function(pair,i){
+    a('<div class="sc '+(i===0?'t1':i<=2?'t2':'')+'">'+pair[0]+'<span class="sc-pct">'+pair[1]+'%</span></div>');
+  });
+  a('</div><div style="font-size:10px;color:var(--text3);margin-top:8px">~'+d.corners_expected+' corners - ~'+d.yellows_expected+' amarillas</div></div>');
+  a('</div>');
+
+  // Value bets
+  if(d.value_bets && d.value_bets.length){
+    a('<div class="inner" style="margin-top:1rem;border-color:rgba(245,158,11,.3)">');
+    a('<div class="in-ttl" style="color:var(--yellow)">Value Bets detectados</div>');
+    a('<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Mercados donde nuestro modelo supera la cuota del mercado</div>');
+    d.value_bets.forEach(function(v){
+      a('<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,30,50,.8)">');
+      a('<div><div style="font-size:12px;font-weight:700;color:#fff">'+v.label+'</div>');
+      a('<div style="font-size:10px;color:var(--text3)">Cuota: '+v.market_odds+'x | Prob: '+v.implied_prob+'%</div></div>');
+      a('<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--yellow)">'+v.verdict+'</div>');
+      a('<div style="font-size:11px;color:var(--green)">+'+v.edge+'% edge</div></div></div>');
+    });
+    a('</div>');
+  }
+
+  // Botones
+  a('<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem">');
+  a('<button class="add-parlay" data-h="'+encodeURIComponent(d.home)+'" data-a="'+encodeURIComponent(d.away)+'" onclick="prefillAllFromData(this)">+ Parlay</button>');
+  a('<button class="add-parlay" style="background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.3);color:var(--blue)" data-h="'+encodeURIComponent(d.home)+'" data-a="'+encodeURIComponent(d.away)+'" onclick="showH2HFromData(this)">H2H</button>');
+  a('</div>');
+
+  rw.innerHTML = htm.join('');
 }
 
 // =========================================================
@@ -1378,9 +1416,9 @@ function addLeg(){
   const h=getSelVal('pl-h'), a=getSelVal('pl-a');  // usa pl-h-val y pl-a-val
   const t=document.getElementById('pl-t').value;
   const lbl=document.getElementById('pl-t').selectedOptions[0].text;
-  if(!h||!a||h===a){ toast('⚠️ Elige dos equipos distintos'); return; }
-  legs.push({home:h,away:a,pick_type:t,display:`${h} vs ${a} · ${lbl}`});
-  renderLegs(); toast('✓ Agregado al parlay');
+  if(!h||!a||h===a){ toast('(!) Elige dos equipos distintos'); return; }
+  legs.push({home:h,away:a,pick_type:t,display:`${h} vs ${a} . ${lbl}`});
+  renderLegs(); toast('OK Agregado al parlay');
 }
 function renderLegs(){
   const el=document.getElementById('legs-wrap');
@@ -1401,8 +1439,8 @@ async function calcParlay(){
   try{
     const r=await fetch(API+'/api/parlay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({picks:legs})});
     const d=await r.json(); renderParlay(d);
-  }catch(e){ toast('❌ Error al calcular'); }
-  finally{ btn.disabled=false; btn.textContent='Calcular parlay ↗'; }
+  }catch(e){ toast('Error Error al calcular'); }
+  finally{ btn.disabled=false; btn.textContent='Calcular parlay >'; }
 }
 function renderParlay(d){
   const pc=d.combined_probability>20?'var(--green)':d.combined_probability>8?'var(--yellow)':'var(--red)';
@@ -1414,13 +1452,13 @@ function renderParlay(d){
       <div class="ph-rat">${d.value_rating}</div>
     </div>
     <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;margin-bottom:8px">${d.num_legs} selecciones</div>
-    ${(d.picks||[]).map(p=>`<div class="ld"><div class="ld-match">${p.match}</div><div class="ld-pick">✓ ${p.pick}</div><div class="ld-stats"><span class="ls">${p.probability}%</span><span class="ls">${p.decimal_odds}x</span><span class="ls">${p.american_odds}</span><span class="ls">xG ${p.xg}</span></div></div>`).join('')}
+    ${(d.picks||[]).map(p=>`<div class="ld"><div class="ld-match">${p.match}</div><div class="ld-pick">OK ${p.pick}</div><div class="ld-stats"><span class="ls">${p.probability}%</span><span class="ls">${p.decimal_odds}x</span><span class="ls">${p.american_odds}</span><span class="ls">xG ${p.xg}</span></div></div>`).join('')}
     <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:.875rem">
     <button class="btn-clear" style="margin-top:0" onclick="clearParlay()">Limpiar parlay</button>
-    <button onclick="shareParlay(d)" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;transition:.15s;white-space:nowrap" onmouseover="this.style.background='rgba(37,211,102,.25)'" onmouseout="this.style.background='rgba(37,211,102,.15)'">📲 WhatsApp</button>
+    <button onclick="shareParlay(d)" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;transition:.15s;white-space:nowrap" onmouseover="this.style.background='rgba(37,211,102,.25)'" onmouseout="this.style.background='rgba(37,211,102,.15)'"> WhatsApp</button>
   </div>\`;
 }
-function clearParlay(){ legs=[]; renderLegs(); document.getElementById('p-result').innerHTML='<div class="pempty"><div class="pe-icon">🎯</div><div class="pe-txt">Parlay limpiado</div></div>'; }
+function clearParlay(){ legs=[]; renderLegs(); document.getElementById('p-result').innerHTML='<div class="pempty"><div class="pe-icon"></div><div class="pe-txt">Parlay limpiado</div></div>'; }
 
 // =========================================================
 // CHAMPION
@@ -1455,25 +1493,26 @@ function renderChamp(){
   document.getElementById('champ-body').innerHTML=order.map((e,i)=>{
     if(!e) return '';
     const[nm,pt]=e, fu=furl(nm,80);
-    return `<div class="champ-team" onclick="analyzeTeam('${nm}')" style="${i===1?'transform:translateY(-6px)':''}">
-      ${fu?`<img src="${fu}" class="champ-flag" width="${sizes[i][0]}" height="${sizes[i][1]}" alt="${nm}" onerror="this.style.display='none'">`:''}
-      <span class="champ-pct" style="color:${colors[i]}">${pt.toFixed(1)}%</span>
-      <span class="champ-name">${nm.split(' ')[0]}</span>
-      <span style="font-size:16px">${medals[i]}</span>
-    </div>`;
+    var nm=e[0],pt=e[1],fu=furl(e[0],80);
+    var stl=i===1?'transform:translateY(-6px)':'';
+    var img=fu?'<img src="'+fu+'" class="champ-flag" width="'+sizes[i][0]+'" height="'+sizes[i][1]+'" alt="">':'';
+    return '<div class="champ-team" data-nm="'+encodeURIComponent(nm)+'" onclick="analyzeTeam(decodeURIComponent(this.dataset.nm))" style="'+stl+'">'
+      +img
+      +'<span class="champ-pct" style="color:'+colors[i]+'">'+pt.toFixed(1)+'%</span>'
+      +'<span class="champ-name">'+nm.split(' ')[0]+'</span>'
+      +'<span style="font-size:16px">'+medals[i]+'</span></div>';
   }).join('');
   const maxP=sorted[0][1];
   document.getElementById('champ-bars').innerHTML=rest.map(([nm,pt])=>{
     const fu=furl(nm,40);
     return `<div class="cb-row">
-      <div class="cb-lbl">${fu?`<img src="${fu}" width="16" height="11" style="border-radius:2px;object-fit:cover" alt="${nm}" onerror="this.style.display='none'">`:''}<span style="font-size:9px;color:var(--text2)">${nm.split(' ')[0]}</span></div>
+      <div class="cb-lbl">${fu?`<img src="${fu}" width="16" height="11" style="border-radius:2px;object-fit:cover" alt="${nm}" onerror="this.setAttribute('style','display:none')">`:''}<span style="font-size:9px;color:var(--text2)">${nm.split(' ')[0]}</span></div>
       <div class="cb-track"><div class="cb-fill" style="width:${(pt/maxP*100).toFixed(0)}%"></div></div>
       <span class="cb-pct">${pt.toFixed(1)}%</span>
-    </div>`;
   }).join('');
   const played=liveMatches.filter(m=>getSt(m)==='finished').length;
   const now=new Date().toLocaleString('es-PA',{timeZone:'America/Panama',hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'});
-  document.getElementById('champ-upd').textContent=`${played} partidos · ${now} (Panamá)`;
+  document.getElementById('champ-upd').textContent=`${played} partidos . ${now} (Panamá)`;
 }
 
 // =========================================================
@@ -1507,10 +1546,9 @@ function tsHtml(t,isWin,prob){
   if(!t) return `<div class="ts tbd"><span class="ts-name">Por definir</span></div>`;
   const fu=furl(t.team,32);
   return `<div class="ts ${isWin?'win':''}">
-    ${fu?`<img src="${fu}" class="ts-flag" alt="${t.team}" onerror="this.style.display='none'">`:''}
+    ${fu?`<img src="${fu}" class="ts-flag" alt="${t.team}" onerror="this.setAttribute('style','display:none')">`:''}
     <span class="ts-name">${t.team.length>12?t.team.split(' ')[0]:t.team}</span>
     ${prob?`<span class="ts-prob">${prob}%</span>`:''}
-  </div>`;
 }
 function msHtml(a,b,isFinal=false){
   const sim=simWin(a,b);
@@ -1518,13 +1556,11 @@ function msHtml(a,b,isFinal=false){
   return `<div class="ms ${isFinal?'final':''}">
     ${tsHtml(a,w?.team===a?.team,sim.pA)}
     ${tsHtml(b,w?.team===b?.team,sim.pB)}
-  </div>`;
 }
 function colHtml(title,pairs){
   return `<div class="b-col">
     <div class="b-col-t">${title}</div>
     ${pairs.map(([a,b])=>msHtml(a,b)).join('')}
-  </div>`;
 }
 
 function renderBracket(){
@@ -1589,12 +1625,12 @@ function renderBracket(){
     ${colHtml('4tos',   lQ)}
     ${colHtml('Semis',  [[lQW[0],lQW[1]]])}
     <div class="b-final-col">
-      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--yellow);text-align:center;margin-bottom:8px">FINAL<br>19 Jul · MetLife NJ</div>
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--yellow);text-align:center;margin-bottom:8px">FINAL<br>19 Jul . MetLife NJ</div>
       ${msHtml(lSF.winner,rSF.winner,true)}
       <div style="text-align:center;margin-top:10px">
-        <div style="font-size:28px">🏆</div>
+        <div style="font-size:28px"></div>
         <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:5px">
-          ${fu_c?`<img src="${fu_c}" width="24" height="17" style="border-radius:3px;object-fit:cover" alt="${champ?.team}" onerror="this.style.display='none'">`:'' }
+          ${fu_c?`<img src="${fu_c}" width="24" height="17" style="border-radius:3px;object-fit:cover" alt="${champ?.team}" onerror="this.setAttribute('style','display:none')">`:'' }
           <span style="font-size:11px;font-weight:800;color:var(--yellow)">${champ?.team||'?'}</span>
         </div>
         ${cp>0?`<div style="font-size:10px;color:var(--text3);margin-top:2px">${cp.toFixed(1)}% prob</div>`:''}
@@ -1611,9 +1647,9 @@ function renderBracket(){
 // AI TICKET
 // =========================================================
 const AI_CFG={
-  safe:{label:'🛡️ Ticket Asegurado',badge:'tb-safe',desc:'Picks con mayor probabilidad estadística. Bajo riesgo.',minProb:62,maxLegs:3,oddsMin:1.2,oddsMax:1.8},
-  risk:{label:'⚡ Ticket Equilibrado',badge:'tb-risk',desc:'Balance riesgo/recompensa con valor estadístico real.',minProb:52,maxLegs:4,oddsMin:1.8,oddsMax:4.0},
-  jackpot:{label:'🚀 Ticket Jackpot',badge:'tb-jack',desc:'Máxima recompensa potencial. Alto riesgo calculado.',minProb:38,maxLegs:5,oddsMin:4.0,oddsMax:25.0},
+  safe:{label:' Ticket Asegurado',badge:'tb-safe',desc:'Picks con mayor probabilidad estadística. Bajo riesgo.',minProb:62,maxLegs:3,oddsMin:1.2,oddsMax:1.8},
+  risk:{label:' Ticket Equilibrado',badge:'tb-risk',desc:'Balance riesgo/recompensa con valor estadístico real.',minProb:52,maxLegs:4,oddsMin:1.8,oddsMax:4.0},
+  jackpot:{label:' Ticket Jackpot',badge:'tb-jack',desc:'Máxima recompensa potencial. Alto riesgo calculado.',minProb:38,maxLegs:5,oddsMin:4.0,oddsMax:25.0},
 };
 
 async function openAITicket(mode){
@@ -1630,15 +1666,15 @@ async function openAITicket(mode){
   const combined=picks.reduce((acc,p)=>acc*(p.probability/100),1);
   const cpct=(combined*100).toFixed(2);
   const odds=(1/combined).toFixed(2);
-  const rating=combined>0.2?'🔥 Alta probabilidad':combined>0.08?'✅ Valor moderado':'⚡ Alto riesgo / alta recompensa';
+  const rating=combined>0.2?' Alta probabilidad':combined>0.08?'OK Valor moderado':' Alto riesgo / alta recompensa';
   const pColor=combined>0.2?'var(--green)':combined>0.08?'var(--yellow)':'var(--red)';
   document.getElementById('modal-body').innerHTML=`
     <div class="t-card">
       <div class="t-badge ${cfg.badge}">${cfg.label}</div>
       <div class="t-picks">
         ${picks.map(p=>`<div class="tp">
-          <div class="tp-l"><div class="tp-match">${p.home} vs ${p.away}</div><div class="tp-pick">✓ ${p.label}</div></div>
-          <div class="tp-r"><div class="tp-prob">${p.probability}%</div><div class="tp-odds">${p.decimal_odds}x · ${p.american_odds}</div></div>
+          <div class="tp-l"><div class="tp-match">${p.home} vs ${p.away}</div><div class="tp-pick">OK ${p.label}</div></div>
+          <div class="tp-r"><div class="tp-prob">${p.probability}%</div><div class="tp-odds">${p.decimal_odds}x . ${p.american_odds}</div></div>
         </div>`).join('')}
       </div>
       <div class="t-totals">
@@ -1647,8 +1683,8 @@ async function openAITicket(mode){
       </div>
       <div style="text-align:center;margin-top:.75rem;font-size:15px">${rating}</div>
     </div>
-    <button class="btn-use" onclick="useTicket(${JSON.stringify(picks).split('"').join('&quot;')})">Usar en el Parlay Builder ↗</button>
-    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:.75rem">⚠️ Solo fines informativos. Juega responsablemente.</div>`;
+    <button class="btn-use" onclick="useTicket(${JSON.stringify(picks).split('"').join('&quot;')})">Usar en el Parlay Builder ></button>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:.75rem">(!) Solo fines informativos. Juega responsablemente.</div>`;
 }
 
 async function genTicket(mode){
@@ -1692,7 +1728,7 @@ async function genTicket(mode){
         {type:'away_win',prob:d.away_win_prob,lbl:`${aT.team} gana`,odds:+(100/Math.max(d.away_win_prob,1)).toFixed(2)},
         {type:'over_25',prob:d.over_25,lbl:'Más de 2.5 goles',odds:+(100/Math.max(d.over_25,1)).toFixed(2)},
         {type:'under_25',prob:100-d.over_25,lbl:'Menos de 2.5 goles',odds:+(100/Math.max(100-d.over_25,1)).toFixed(2)},
-        {type:'btts_yes',prob:d.btts,lbl:'Ambos anotan — Sí',odds:+(100/Math.max(d.btts,1)).toFixed(2)},
+        {type:'btts_yes',prob:d.btts,lbl:'Ambos anotan -- Sí',odds:+(100/Math.max(d.btts,1)).toFixed(2)},
         {type:'over_35',prob:d.over_35,lbl:'Más de 3.5 goles',odds:+(100/Math.max(d.over_35,1)).toFixed(2)},
         {type:'over_9_corners',prob:d.over_9_corners,lbl:'Más de 9 corners',odds:+(100/Math.max(d.over_9_corners,1)).toFixed(2)},
         {type:'draw',prob:d.draw_prob,lbl:'Empate',odds:+(100/Math.max(d.draw_prob,1)).toFixed(2)},
@@ -1719,7 +1755,7 @@ async function genTicket(mode){
       const amer=best.prob>=50?`-${Math.round((best.prob/100/(1-best.prob/100))*100)}`:`+${Math.round(((1-best.prob/100)/(best.prob/100))*100)}`;
       picks.push({
         home:hT.team,away:aT.team,
-        group:(m.group||'')+(dayLbl?' · '+dayLbl:''),
+        group:(m.group||'')+(dayLbl?' . '+dayLbl:''),
         label:best.lbl,pick_type:best.type,
         probability:best.prob,decimal_odds:best.odds,american_odds:amer,
         matchTime:m.utcDate?toPT(m.utcDate):'',
@@ -1748,7 +1784,7 @@ async function genTicket(mode){
         const bp=(d.best_picks||[]).find(p=>p.decimal_odds>=cfg.oddsMin&&p.decimal_odds<=cfg.oddsMax);
         if(!bp) continue;
         picks.push({home:hT.team,away:aT.team,
-          group:(m.group||'')+' · '+toPD(m.utcDate),
+          group:(m.group||'')+' . '+toPD(m.utcDate),
           label:bp.label,pick_type:bp.pick_type,
           probability:bp.probability,decimal_odds:bp.decimal_odds,american_odds:bp.american_odds});
       }catch(e){}
@@ -1819,22 +1855,21 @@ async function showH2H(h,a){
 }
 
 function shareParlay(d){
-  const lines = [`🎯 *Parlay Mundial 2026*`,`💰 Cuota total: ${d.parlay_decimal_odds}x`,`📊 Probabilidad: ${d.combined_probability}%`,`${d.value_rating}`,``];
-  (d.picks||[]).forEach((p,i)=>{
-    lines.push(`${i+1}. ${p.match}`);
-    lines.push(`   ✓ ${p.pick} · ${p.probability}% · ${p.decimal_odds}x`);
+  var lines = ['*Parlay Mundial 2026*','Cuota total: '+d.parlay_decimal_odds+'x','Probabilidad: '+d.combined_probability+'%',d.value_rating,''];
+  (d.picks||[]).forEach(function(p,i){
+    lines.push((i+1)+'. '+p.match);
+    lines.push('   '+p.pick+' - '+p.probability+'% - '+p.decimal_odds+'x');
   });
-  lines.push(``, `🌐 mundial-analyzer.onrender.com`);
-  const text = encodeURIComponent(lines.join('\n'));
-  window.open(`https://wa.me/?text=${text}`,'_blank');
+  lines.push('','mundial-analyzer.onrender.com');
+  window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
 }
 
 function useTicket(picks){
-  legs=picks.map(p=>({home:p.home,away:p.away,pick_type:p.pick_type,display:`${p.home} vs ${p.away} · ${p.label}`}));
+  legs=picks.map(p=>({home:p.home,away:p.away,pick_type:p.pick_type,display:`${p.home} vs ${p.away} . ${p.label}`}));
   renderLegs();
   closeModal();
   goTab('parlay');
-  toast('✓ Ticket cargado en el Parlay Builder');
+  toast('OK Ticket cargado en el Parlay Builder');
   setTimeout(calcParlay,400);
 }
 function closeModal(){ document.getElementById('ai-modal').classList.remove('show'); }
