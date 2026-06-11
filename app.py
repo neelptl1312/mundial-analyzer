@@ -373,7 +373,17 @@ def add_headers(r):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    import os
+    html_path = os.path.join(os.path.dirname(__file__), "frontend", "templates", "index.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    resp = make_response(html)
+    resp.headers["Content-Type"] = "text/html; charset=utf-8"
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "-1"
+    resp.headers["ETag"] = str(os.path.getmtime(html_path))
+    return resp
 
 @app.route("/api/status")
 def api_status():
