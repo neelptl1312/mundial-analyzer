@@ -39,25 +39,39 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .select2-results__options{max-height:250px}
 
 /* HEADER */
-header{background:rgba(5,5,10,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.hdr{max-width:1440px;margin:0 auto;padding:0 .75rem;height:52px;display:flex;align-items:center;gap:8px}
-.logo{display:flex;align-items:center;gap:7px;flex-shrink:0;text-decoration:none}
-.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.logo-txt{font-size:13px;font-weight:800;color:#fff;display:none}
-@media(min-width:420px){.logo-txt{display:block}}
-nav{display:flex;gap:2px;flex:1;min-width:0}
-.nb{background:none;border:1px solid transparent;color:var(--text3);padding:6px 8px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap;font-family:'Inter',sans-serif;flex:1;justify-content:center;min-width:0}
+header{background:rgba(5,5,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.hdr{max-width:1440px;margin:0 auto;padding:0 .875rem;height:54px;display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-txt{font-size:14px;font-weight:800;color:#fff}
+/* Desktop nav */
+nav{display:none;gap:3px;flex:1}
+@media(min-width:600px){nav{display:flex}}
+.nb{background:none;border:1px solid transparent;color:var(--text3);padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:'Inter',sans-serif}
 .nb:hover{background:var(--bg3);color:var(--text)}
 .nb.on{background:linear-gradient(135deg,rgba(79,142,247,.2),rgba(139,92,246,.2));color:var(--blue);border-color:rgba(79,142,247,.25)}
-.nb span.nb-icon{font-size:13px;flex-shrink:0}
-.nb span.nb-txt{display:none;font-size:11px}
-@media(min-width:500px){.nb span.nb-txt{display:inline}}
-.hdr-r{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.live-badge{display:flex;align-items:center;gap:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--green);white-space:nowrap}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1s infinite;flex-shrink:0}
+.hdr-r{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.live-badge{display:flex;align-items:center;gap:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--green);white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1s infinite;flex-shrink:0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.api-st{font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px 7px;display:none}
-@media(min-width:600px){.api-st{display:block}}
+.api-st{font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px 8px;display:none}
+@media(min-width:500px){.api-st{display:block}}
+/* Hamburger */
+.hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:8px;flex-shrink:0;transition:.15s}
+@media(min-width:600px){.hamburger{display:none}}
+.hamburger span{display:block;height:2px;background:var(--text2);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+/* Mobile menu overlay */
+.mob-menu{position:fixed;top:54px;left:0;right:0;background:rgba(5,5,10,.98);border-bottom:1px solid var(--border);z-index:99;padding:.75rem;display:none;flex-direction:column;gap:4px;backdrop-filter:blur(20px)}
+.mob-menu.open{display:flex}
+.mob-nb{background:none;border:1px solid transparent;color:var(--text2);padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:10px;width:100%;text-align:left;transition:.15s}
+.mob-nb:hover{background:var(--bg3);color:var(--text)}
+.mob-nb.on{background:linear-gradient(135deg,rgba(79,142,247,.15),rgba(139,92,246,.15));color:var(--blue);border-color:rgba(79,142,247,.2)}
+.mob-nb-icon{font-size:18px;width:28px;text-align:center}
+.mob-nb-txt{font-size:14px;font-weight:600}
+.mob-nb-sub{font-size:11px;color:var(--text3);margin-left:auto}
 
 /* TICKET BAR */
 .ticket-bar{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(6,182,212,.06),rgba(79,142,247,.08));border:1px solid rgba(16,185,129,.25);border-radius:14px;padding:.75rem;margin:.75rem auto;max-width:1440px;display:flex;flex-direction:column;gap:.75rem;position:relative;z-index:1}
@@ -360,17 +374,35 @@ select{background:var(--bg3);border:1px solid var(--border);color:var(--text);pa
       <span class="logo-txt">Mundial 2026</span>
     </div>
     <nav>
-      <button class="nb on" id="nb-dashboard" onclick="goTab('dashboard')"><span class="nb-icon">📊</span><span class="nb-txt">Dashboard</span></button>
-      <button class="nb" id="nb-match" onclick="goTab('match')"><span class="nb-icon">🔍</span><span class="nb-txt">Analizar</span></button>
-      <button class="nb" id="nb-parlay" onclick="goTab('parlay')"><span class="nb-icon">🎯</span><span class="nb-txt">Parlay</span></button>
-      <button class="nb" id="nb-bracket" onclick="goTab('bracket')"><span class="nb-icon">🏆</span><span class="nb-txt">Llaves</span></button>
+      <button class="nb on" id="nb-dashboard" onclick="goTab('dashboard')">📊 Dashboard</button>
+      <button class="nb" id="nb-match" onclick="goTab('match')">🔍 Analizar</button>
+      <button class="nb" id="nb-parlay" onclick="goTab('parlay')">🎯 Parlay</button>
+      <button class="nb" id="nb-bracket" onclick="goTab('bracket')">🏆 Llaves</button>
     </nav>
     <div class="hdr-r">
       <div class="live-badge"><span class="live-dot"></span>LIVE</div>
       <div class="api-st" id="api-st">Cargando...</div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob-menu">
+  <button class="mob-nb on" id="mob-nb-dashboard" onclick="goTabMob('dashboard')">
+    <span class="mob-nb-icon">📊</span><span class="mob-nb-txt">Dashboard</span><span class="mob-nb-sub">Grupos · Partidos · Equipos</span>
+  </button>
+  <button class="mob-nb" id="mob-nb-match" onclick="goTabMob('match')">
+    <span class="mob-nb-icon">🔍</span><span class="mob-nb-txt">Analizar partido</span><span class="mob-nb-sub">xG · Probabilidades · Picks</span>
+  </button>
+  <button class="mob-nb" id="mob-nb-parlay" onclick="goTabMob('parlay')">
+    <span class="mob-nb-icon">🎯</span><span class="mob-nb-txt">Parlay Builder</span><span class="mob-nb-sub">Combina picks · Valor esperado</span>
+  </button>
+  <button class="mob-nb" id="mob-nb-bracket" onclick="goTabMob('bracket')">
+    <span class="mob-nb-icon">🏆</span><span class="mob-nb-txt">Llaves del Mundial</span><span class="mob-nb-sub">Bracket · Pronóstico al campeón</span>
+  </button>
+</div>
 
 <!-- TICKET BAR -->
 <div class="ticket-bar" style="margin-left:.75rem;margin-right:.75rem" id="ticket-bar">
@@ -617,7 +649,7 @@ function toast(msg,dur=2500){
 }
 
 // =========================================================
-// TABS — una sola función limpia con history API
+// TABS — menú hamburguesa + desktop nav
 // =========================================================
 const TABS = ['dashboard','match','parlay','bracket'];
 let curTab = 'dashboard';
@@ -628,11 +660,34 @@ function goTab(name){
   TABS.forEach(t=>{
     document.getElementById('tab-'+t)?.classList.toggle('on',t===name);
     document.getElementById('nb-'+t)?.classList.toggle('on',t===name);
+    document.getElementById('mob-nb-'+t)?.classList.toggle('on',t===name);
   });
   history.pushState({tab:name},'','#'+name);
   window.scrollTo({top:0,behavior:'smooth'});
   if(name==='bracket') renderBracket();
 }
+
+function goTabMob(name){
+  toggleMenu(); // cerrar menú
+  goTab(name);
+}
+
+function toggleMenu(){
+  const menu=document.getElementById('mob-menu');
+  const ham=document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  ham.classList.toggle('open');
+}
+
+// Cerrar menú al hacer click fuera
+document.addEventListener('click',e=>{
+  const menu=document.getElementById('mob-menu');
+  const ham=document.getElementById('hamburger');
+  if(menu?.classList.contains('open') && !menu.contains(e.target) && !ham.contains(e.target)){
+    menu.classList.remove('open');
+    ham.classList.remove('open');
+  }
+});
 
 window.addEventListener('popstate',e=>{
   const t=e.state?.tab||location.hash.replace('#','')||'dashboard';
@@ -641,6 +696,7 @@ window.addEventListener('popstate',e=>{
   TABS.forEach(n=>{
     document.getElementById('tab-'+n)?.classList.toggle('on',n===t);
     document.getElementById('nb-'+n)?.classList.toggle('on',n===t);
+    document.getElementById('mob-nb-'+n)?.classList.toggle('on',n===t);
   });
   if(t==='bracket') renderBracket();
 });
@@ -684,18 +740,26 @@ function getTeams(m){ return{h:nes(m.homeTeam?.name||m.teams?.home?.name||'Local
 
 function processStats(){
   const tod=todayPA(), tom=tomorrowPA();
-  let g=0,p=0,l=0,t=0;
+  let g=0,p=0,l=0,todayCnt=0,tomCnt=0;
+  const seen=new Set();
   liveMatches.forEach(m=>{
+    const id=m.id||m.fixture?.id||(m.homeTeam?.name+m.awayTeam?.name);
+    if(seen.has(id)) return; seen.add(id); // evitar duplicados
     const st=getSt(m),sc=getScore(m);
     if(st==='live') l++;
     if(st==='finished'){ p++; g+=(+sc.h||0)+(+sc.a||0); }
     const md=m.utcDate?msPA(m.utcDate):'';
-    if(md===tod||md===tom) t++;
+    if(md===tod) todayCnt++;
+    else if(md===tom) tomCnt++;
   });
   document.getElementById('m-g').textContent=g||'—';
   document.getElementById('m-p').textContent=p||'—';
   document.getElementById('m-l').textContent=l;
-  document.getElementById('m-t').textContent=t||'—';
+  // Mostrar "X hoy · Y mañana" o solo uno si el otro es 0
+  const parts=[];
+  if(todayCnt>0) parts.push(todayCnt+' hoy');
+  if(tomCnt>0) parts.push(tomCnt+' mañana');
+  document.getElementById('m-t').textContent=parts.length?parts.join(' · '):'—';
   document.getElementById('lv-ct').textContent=l>0?l+' live':'0 live';
 }
 
@@ -1043,12 +1107,22 @@ function getGrpTeam(pos,grp){
   return teams[pos-1]||null;
 }
 function simWin(a,b){
-  if(!a) return {winner:b,pA:30,pB:70};
-  if(!b) return {winner:a,pA:70,pB:30};
-  const sA=(a.fifa_rating||1600)*0.5+(a.form_score||50)*0.3+(a.avg_goals_scored||1.2)*8;
-  const sB=(b.fifa_rating||1600)*0.5+(b.form_score||50)*0.3+(b.avg_goals_scored||1.2)*8;
-  const pA=Math.exp(sA*0.015)/(Math.exp(sA*0.015)+Math.exp(sB*0.015));
-  return {winner:pA>0.5?a:b, pA:Math.round(pA*100), pB:Math.round((1-pA)*100)};
+  if(!a) return {winner:b,pA:28,pB:72};
+  if(!b) return {winner:a,pA:72,pB:28};
+  // Score basado en FIFA rating (principal), forma reciente y xG promedio
+  const sA=(a.fifa_rating||1600)*0.6+(a.form_score||50)*0.25+(a.avg_goals_scored||1.2)*12-(a.avg_goals_conceded||1.2)*8;
+  const sB=(b.fifa_rating||1600)*0.6+(b.form_score||50)*0.25+(b.avg_goals_scored||1.2)*12-(b.avg_goals_conceded||1.2)*8;
+  // Escalar de forma que las probabilidades sean realistas (no extremas)
+  const diff=(sA-sB);
+  const scale=0.008; // más bajo = diferencias más pequeñas y realistas
+  const rawP=1/(1+Math.exp(-diff*scale));
+  // Clamp entre 25% y 75% para que sea creíble en fútbol
+  const pA=Math.max(0.25,Math.min(0.75,rawP));
+  // Añadir algo de aleatoriedad controlada basada en el seed del partido
+  const seed=((a.fifa_rating||1600)+(b.fifa_rating||1600))%7;
+  const noise=(seed-3)*0.01; // entre -0.03 y +0.03
+  const finalPA=Math.max(0.26,Math.min(0.74,pA+noise));
+  return {winner:finalPA>0.5?a:b, pA:Math.round(finalPA*100), pB:Math.round((1-finalPA)*100)};
 }
 function tsHtml(t,isWin,prob){
   if(!t) return `<div class="ts tbd"><span class="ts-name">Por definir</span></div>`;
