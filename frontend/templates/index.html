@@ -368,6 +368,11 @@ select{background:var(--bg3);border:1px solid var(--border);color:var(--text);pa
 .toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border2);border-radius:11px;padding:10px 18px;font-size:12px;color:var(--text);z-index:999;opacity:0;transition:.3s;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
+<script>
+// Pre-init síncrono - establece datos antes del DOM
+window._PRELOADED = true;
+window._PRE_TEAMS = 48;
+</script>
 </head>
 <body>
 <div id="app">
@@ -779,6 +784,8 @@ function buildLocalTeams(){
 }
 
 async function init(){
+  if(window._initRan) return; // evitar doble ejecución
+  window._initRan = true;
   const hash=location.hash.replace('#','');
   if(TABS.includes(hash)){ curTab=hash; TABS.forEach(n=>{ document.getElementById('tab-'+n)?.classList.toggle('on',n===hash); document.getElementById('nb-'+n)?.classList.toggle('on',n===hash); }); }
   history.replaceState({tab:curTab},'','#'+curTab);
@@ -1758,7 +1765,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   el.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-el.offsetLeft;el.scrollLeft=scrollL-(x-startX)*1.5;});
 });
 
+// Doble seguro: DOMContentLoaded Y load como fallback
 window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('load', ()=>{ 
+  // Si init no corrió aún (por algún error), intentar de nuevo
+  if(!window._initRan) { console.log('fallback init'); init(); }
+});
 </script>
 </body>
 </html>
