@@ -303,11 +303,14 @@ def api_status():
 
 @app.route("/api/teams")
 def api_teams():
-    out=[]
-    for grp,names in GROUPS_DATA.items():
-        for n in names:
-            d=get_team_data(n); d["group"]=grp; out.append(d)
-    return jsonify(out)
+    try:
+        out=[]
+        for grp,names in GROUPS_DATA.items():
+            for n in names:
+                d=get_team_data(n); d["group"]=grp; out.append(d)
+        return jsonify(out)
+    except Exception as e:
+        return jsonify({"error":str(e)}),500
 
 @app.route("/api/teams/<group>")
 def api_teams_group(group):
