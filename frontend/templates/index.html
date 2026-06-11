@@ -780,15 +780,30 @@ function renderMatches(){
     else if(md===tod) badge='<span class="badge b-hoy">HOY</span>';
     else if(md===tom) badge='<span class="badge b-man">MAÑANA</span>';
     else badge='<span style="font-size:10px;color:var(--text3)">'+dt+'</span>';
-    const hf=furl(hn,64), af=furl(an,64);
-    return `<div class="mc ${st==='live'?'lv':''}" onclick="analyzeFromMatch('${hn}','${an}')">
+    // Buscar nombre exacto del equipo en nuestro sistema (con acento)
+    const hTeam = allTeams.find(t=>t.team===hn) || allTeams.find(t=>hn.toLowerCase().includes(t.team.toLowerCase().split(' ')[0])) || {team:hn};
+    const aTeam = allTeams.find(t=>t.team===an) || allTeams.find(t=>an.toLowerCase().includes(t.team.toLowerCase().split(' ')[0])) || {team:an};
+    const hName = hTeam.team, aName = aTeam.team;
+    const hf=furl(hName,64), af=furl(aName,64);
+    // Escapar comillas para usar en onclick
+    const hEsc=hName.replace(/'/g,"\\'"), aEsc=aName.replace(/'/g,"\\'");
+    return `<div class="mc ${st==='live'?'lv':''}">
       <div class="mc-top"><span class="mc-grp">${grp}</span><span class="mc-time ${st==='live'?'lv':''}">${getTime(m)} ${badge}</span></div>
-      <div class="mc-teams">
-        <div class="mc-team">${hf?`<img src="${hf}" class="mc-fi" alt="${hn}" onerror="this.replaceWith(document.createTextNode('🏳️'))">`:'🏳️'}<div class="mc-nm">${hn.length>12?hn.split(' ')[0]:hn}</div></div>
+      <div class="mc-teams" onclick="analyzeFromMatch('${hEsc}','${aEsc}')" style="cursor:pointer">
+        <div class="mc-team">
+          ${hf?`<img src="${hf}" class="mc-fi" alt="${hName}" onerror="this.src='';this.style.fontSize='22px';this.outerHTML='🏳️'">`:'<span style="font-size:22px">🏳️</span>'}
+          <div class="mc-nm">${hName.length>12?hName.split(' ')[0]:hName}</div>
+        </div>
         <div class="mc-sb"><div class="mc-sc">${sc.h}–${sc.a}</div><div class="mc-ss">${st==='finished'?'Final':st==='live'?'Live':'vs'}</div></div>
-        <div class="mc-team">${af?`<img src="${af}" class="mc-fi" alt="${an}" onerror="this.replaceWith(document.createTextNode('🏳️'))">`:'🏳️'}<div class="mc-nm">${an.length>12?an.split(' ')[0]:an}</div></div>
+        <div class="mc-team">
+          ${af?`<img src="${af}" class="mc-fi" alt="${aName}" onerror="this.src='';this.style.fontSize='22px';this.outerHTML='🏳️'">`:'<span style="font-size:22px">🏳️</span>'}
+          <div class="mc-nm">${aName.length>12?aName.split(' ')[0]:aName}</div>
+        </div>
       </div>
-      <button class="mc-abtn">Analizar probabilidades ↗</button>
+      <div style="display:flex;gap:5px">
+        <button class="mc-abtn" style="flex:2" onclick="analyzeFromMatch('${hEsc}','${aEsc}')">🔍 Analizar ↗</button>
+        <button class="mc-abtn" style="flex:1;background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--green)" onclick="quickAddParlay('${hEsc}','${aEsc}')">+ Parlay</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -918,14 +933,80 @@ function analyzeTeam(name){
   setTimeout(()=>{ setSelVal('ph',name); upFlag('h'); },50);
 }
 function analyzeFromMatch(h,a){
-  const hT=allTeams.find(t=>t.team===h||h.includes(t.team.split(' ')[0]))||allTeams.find(t=>nes(h)===t.team);
-  const aT=allTeams.find(t=>t.team===a||a.includes(t.team.split(' ')[0]))||allTeams.find(t=>nes(a)===t.team);
+  // Buscar equipo con nombre exacto, parcial o traducido
+  const findT = (name) => allTeams.find(t=>t.team===name)
+    || allTeams.find(t=>name.toLowerCase().startsWith(t.team.toLowerCase().split(' ')[0]))
+    || allTeams.find(t=>t.team.toLowerCase().startsWith(name.toLowerCase().split(' ')[0]))
+    || allTeams.find(t=>nes(name)===t.team);
+  const hT=findT(h), aT=findT(a);
   goTab('match');
+  // Pequeño delay para que el tab renderice, luego analizar directo
   setTimeout(()=>{
     if(hT){ setSelVal('ph',hT.team); upFlag('h'); }
     if(aT){ setSelVal('pa',aT.team); upFlag('a'); }
-    setTimeout(doAnalyze,300);
-  },50);
+    // Analizar automáticamente si tenemos ambos equipos
+    if(hT && aT) setTimeout(doAnalyze, 150);
+  },80);
+}
+
+// Agregar partido al parlay rápidamente desde la tarjeta
+function quickAddParlay(h,a){
+  const findT = (name) => allTeams.find(t=>t.team===name)
+    || allTeams.find(t=>name.toLowerCase().startsWith(t.team.toLowerCase().split(' ')[0]))
+    || allTeams.find(t=>nes(name)===t.team);
+  const hT=findT(h), aT=findT(a);
+  if(!hT||!aT){ toast('⚠️ No se encontraron los equipos'); return; }
+  // Mostrar mini modal para elegir el tipo de pick
+  showQuickPickModal(hT.team, aT.team);
+}
+
+function showQuickPickModal(h,a){
+  const hf=furl(h,40), af=furl(a,40);
+  // Analizar primero para mostrar probabilidades
+  fetch(`${API}/api/match/analyze?home=${encodeURIComponent(h)}&away=${encodeURIComponent(a)}`)
+    .then(r=>r.json())
+    .then(d=>{
+      const picks=[
+        {type:'home_win',label:`${h} gana`,prob:d.home_win_prob,odds:+(100/Math.max(d.home_win_prob,1)).toFixed(2)},
+        {type:'away_win',label:`${a} gana`,prob:d.away_win_prob,odds:+(100/Math.max(d.away_win_prob,1)).toFixed(2)},
+        {type:'draw',label:'Empate',prob:d.draw_prob,odds:+(100/Math.max(d.draw_prob,1)).toFixed(2)},
+        {type:'over_25',label:'+2.5 goles',prob:d.over_25,odds:+(100/Math.max(d.over_25,1)).toFixed(2)},
+        {type:'btts_yes',label:'Ambos anotan',prob:d.btts,odds:+(100/Math.max(d.btts,1)).toFixed(2)},
+        {type:'over_35',label:'+3.5 goles',prob:d.over_35,odds:+(100/Math.max(d.over_35,1)).toFixed(2)},
+      ].sort((a,b)=>b.prob-a.prob);
+
+      document.getElementById('modal-title').textContent='Agregar al Parlay';
+      document.getElementById('modal-sub').innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          ${hf?`<img src="${hf}" width="22" height="15" style="border-radius:2px;object-fit:cover">`:''}
+          <strong style="color:#fff">${h}</strong>
+          <span style="color:var(--text3)">vs</span>
+          ${af?`<img src="${af}" width="22" height="15" style="border-radius:2px;object-fit:cover">`:''}
+          <strong style="color:#fff">${a}</strong>
+        </div>
+        <span style="font-size:11px">Elige el pick para agregar al parlay</span>`;
+      document.getElementById('modal-body').innerHTML=`
+        <div style="display:flex;flex-direction:column;gap:7px">
+          ${picks.map(p=>`
+          <button onclick="addPickToParlay('${h}','${a}','${p.type}','${p.label.replace(/'/g,"\\'")}');closeModal()"
+            style="display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 14px;cursor:pointer;font-family:Inter,sans-serif;transition:.15s;color:var(--text)"
+            onmouseover="this.style.borderColor='rgba(79,142,247,.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="font-size:13px;font-weight:600">${p.label}</span>
+            <div style="text-align:right">
+              <span style="font-size:14px;font-weight:800;color:var(--green);font-family:'JetBrains Mono',monospace">${p.prob}%</span>
+              <span style="font-size:11px;color:var(--text3);margin-left:6px">${p.odds}x</span>
+            </div>
+          </button>`).join('')}
+        </div>`;
+      document.getElementById('ai-modal').classList.add('show');
+    })
+    .catch(()=>toast('❌ Error cargando probabilidades'));
+}
+
+function addPickToParlay(h,a,type,label){
+  legs.push({home:h,away:a,pick_type:type,display:`${h} vs ${a} · ${label}`});
+  renderLegs();
+  toast(`✓ Agregado: ${label}`);
 }
 
 // =========================================================
@@ -1021,7 +1102,7 @@ function prefill(h,a,type){
   goTab('parlay');
   setTimeout(()=>{ setSelVal('pl-h',h); setSelVal('pl-a',a); if(type) document.getElementById('pl-t').value=type; },50);
 }
-function prefillAll(h,a){ prefill(h,a,null); }
+function prefillAll(h,a){ showQuickPickModal(h,a); }
 async function calcParlay(){
   if(!legs.length) return;
   const btn=document.getElementById('btn-calc');
