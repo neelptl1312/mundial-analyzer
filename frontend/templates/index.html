@@ -655,26 +655,25 @@ const GROUPS = {
   L:["Inglaterra","Croacia","Ghana","Panamá"],
 };
 
-function furl(t,w){ w=w||32; var c=FLAGS[t]; return c?'https://flagcdn.com/w'+w+'/'+c+'.webp':''; }
+function furl(t,w){
+  w=w||32;
+  var c=FLAGS[t];
+  return c?'https://flagcdn.com/w'+w+'/'+c+'.png':'';
+}
 function flagImg(team,w,h,cls){
   w=w||32; h=h||Math.round(w*0.67); cls=cls||'';
   var c=FLAGS[team];
-  if(!c) return '';
+  if(!c) return null;
   var img=document.createElement('img');
-  img.src='https://flagcdn.com/w'+w+'/'+c+'.webp';
+  img.src='https://flagcdn.com/w'+w+'/'+c+'.png';
   img.width=w; img.height=h;
   if(cls) img.className=cls;
   img.alt=team;
-  img.onerror=function(){
-    // Fallback: intentar PNG
-    if(this.src.indexOf('.webp')>=0){
-      this.src='https://flagcdn.com/w'+w+'/'+c+'.png';
-    } else {
-      this.style.display='none';
-    }
-  };
+  img.style.objectFit='cover';
+  img.onerror=function(){ this.style.display='none'; };
   return img;
 }
+
 function fimg(t,w=28,h=19,r=3){
   const u=furl(t,w);
   return u?'<img src="'+u+'" width="'+w+'" height="'+h+'" style="border-radius:'+r+'px;object-fit:cover;vertical-align:middle" alt="'+t+'" onerror="this.replaceWith(document.createTextNode(\'🏳️\'))">':'🏳️';
@@ -1325,7 +1324,14 @@ function analyzeTeam(name){
   setTimeout(function(){ setSelVal('ph',name); upFlag('h'); },80);
 }
 function analyzeFromMatch(h,a){
-  var findT=function(name){ return allTeams.find(function(t){return t.team===name;})||allTeams.find(function(t){return name.toLowerCase().startsWith(t.team.toLowerCase().split(' ')[0]);})||allTeams.find(function(t){return nes(name)===t.team;}); };
+  var findT=function(name){
+    var t=allTeams.find(function(t){return t.team===name;}); if(t) return t;
+    t=allTeams.find(function(t){return nes(name)===t.team;}); if(t) return t;
+    var w1=name.split(' ')[0].toLowerCase();
+    t=allTeams.find(function(t){return t.team.toLowerCase().startsWith(w1);});if(t) return t;
+    t=allTeams.find(function(t){return name.toLowerCase().includes(t.team.toLowerCase());});
+    return t||{team:name};
+  };
   var hT=findT(h), aT=findT(a);
   goTab('match');
   setTimeout(function(){
@@ -1335,9 +1341,28 @@ function analyzeFromMatch(h,a){
   },80);
 }
 function quickAddParlay(h,a){
-  var findT=function(name){ return allTeams.find(function(t){return t.team===name;})||allTeams.find(function(t){return nes(name)===t.team;}); };
-  var hT=findT(h),aT=findT(a);
-  if(!hT||!aT){toast('No se encontraron los equipos');return;}
+  var findT=function(name){
+    // 1. Exacto
+    var t=allTeams.find(function(t){return t.team===name;});
+    if(t) return t;
+    // 2. Traducción nes
+    var n2=nes(name);
+    t=allTeams.find(function(t){return t.team===n2;});
+    if(t) return t;
+    // 3. Primera palabra (México → busca México)
+    var w1=name.split(' ')[0].toLowerCase();
+    t=allTeams.find(function(t){return t.team.toLowerCase().startsWith(w1)||w1.startsWith(t.team.toLowerCase().split(' ')[0]);});
+    if(t) return t;
+    // 4. Contiene
+    t=allTeams.find(function(t){return name.toLowerCase().includes(t.team.toLowerCase())||t.team.toLowerCase().includes(name.toLowerCase());});
+    return t||null;
+  };
+  var hT=findT(h), aT=findT(a);
+  if(!hT||!aT){
+    // Mostrar modal con los nombres que tenga aunque no estén en allTeams
+    showQuickPickModal(h,a);
+    return;
+  }
   showQuickPickModal(hT.team,aT.team);
 }
 function prefill(h,a,type){
@@ -1616,7 +1641,8 @@ function renderChamp(){
     if(!e) return '';
     var nm=e[0],pt=e[1],fu=furl(e[0],80);
     var stl=i===1?'transform:translateY(-6px)':'';
-    var img=fu?'<img src="'+fu+'" class="champ-flag" width="'+sizes[i][0]+'" height="'+sizes[i][1]+'" alt="">':'';
+    var flagEl=flagImg(nm,sizes[i][0],sizes[i][1],'champ-flag');
+    var img=flagEl?flagEl.outerHTML:'';
     return '<div class="champ-team" data-nm="'+encodeURIComponent(nm)+'" onclick="analyzeTeam(decodeURIComponent(this.dataset.nm))" style="'+stl+'">'
       +img
       +'<span class="champ-pct" style="color:'+colors[i]+'">'+pt.toFixed(1)+'%</span>'
@@ -1644,27 +1670,22 @@ function getGrpTeam(pos,grp){
   return teams[pos-1]||null;
 }
 function simWin(a,b){
-  if(!a) return {winner:b,pA:28,pB:72};
-  if(!b) return {winner:a,pA:72,pB:28};
-  // Score basado en FIFA rating (principal), forma reciente y xG promedio
-  const sA=(a.fifa_rating||1600)*0.6+(a.form_score||50)*0.25+(a.avg_goals_scored||1.2)*12-(a.avg_goals_conceded||1.2)*8;
-  const sB=(b.fifa_rating||1600)*0.6+(b.form_score||50)*0.25+(b.avg_goals_scored||1.2)*12-(b.avg_goals_conceded||1.2)*8;
-  // Escalar de forma que las probabilidades sean realistas (no extremas)
-  const diff=(sA-sB);
-  const scale=0.008; // más bajo = diferencias más pequeñas y realistas
-  const rawP=1/(1+Math.exp(-diff*scale));
-  // Clamp entre 25% y 75% para que sea creíble en fútbol
-  const pA=Math.max(0.25,Math.min(0.75,rawP));
-  // Añadir algo de aleatoriedad controlada basada en el seed del partido
-  const seed=((a.fifa_rating||1600)+(b.fifa_rating||1600))%7;
-  const noise=(seed-3)*0.01; // entre -0.03 y +0.03
-  const finalPA=Math.max(0.26,Math.min(0.74,pA+noise));
-  return {winner:finalPA>0.5?a:b, pA:Math.round(finalPA*100), pB:Math.round((1-finalPA)*100)};
+  if(!a) return {winner:b,pA:30,pB:70};
+  if(!b) return {winner:a,pA:70,pB:30};
+  // Score unificado: mismo que calcChamp usa internamente
+  var sA=(a.fifa_rating||1600)*0.55+(a.form_score||50)*0.30+(a.avg_goals_scored||1.2)*10-(a.avg_goals_conceded||1.2)*8;
+  var sB=(b.fifa_rating||1600)*0.55+(b.form_score||50)*0.30+(b.avg_goals_scored||1.2)*10-(b.avg_goals_conceded||1.2)*8;
+  var diff=sA-sB;
+  var rawP=1/(1+Math.exp(-diff*0.007));
+  // Clamp realista: en fútbol nadie gana más del 75%
+  var pA=Math.max(0.27,Math.min(0.73,rawP));
+  return {winner:pA>0.5?a:b, pA:Math.round(pA*100), pB:Math.round((1-pA)*100)};
 }
 function tsHtml(t,isWin,prob){
   if(!t) return '<div class="ts tbd"><span class="ts-name">Por definir</span></div>';
-  var fu=furl(t.team,32), cls='ts'+(isWin?' win':'');
-  var img=fu?('<img src="'+fu+'" class="ts-flag" alt="">'):'' ;
+  var cls='ts'+(isWin?' win':'');
+  var flagEl=flagImg(t.team,24,16,'ts-flag');
+  var img=flagEl?flagEl.outerHTML:'';
   var name=t.team.length>12?t.team.split(' ')[0]:t.team;
   return '<div class="'+cls+'">'+img+'<span class="ts-name">'+name+'</span>'+(prob?('<span class="ts-prob">'+prob+'%</span>'):'')+'</div>';
 }
