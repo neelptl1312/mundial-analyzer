@@ -1500,76 +1500,73 @@ function clearParlay(){ legs=[]; renderLegs(); document.getElementById('p-result
 // CHAMPION
 // =========================================================
 function calcChamp(){
-  // Monte Carlo: simular el torneo 200 veces con simWin para consistencia con el bracket
   if(!allTeams.length) return {};
   var wins={};
   allTeams.forEach(function(t){ wins[t.team]=0; });
-  var N=200;
+  var N=300; // 300 simulaciones para buena distribución
+
+  // Función auxiliar para obtener equipo de allTeams
+  function getT(name){ return allTeams.find(function(t){return t.team===name;}) || {team:name,fifa_rating:1600,form_score:50,avg_goals_scored:1.2,avg_goals_conceded:1.2}; }
+
+  // Pre-calcular puntos reales de los partidos ya jugados
+  var realPts = {};
+  liveMatches.filter(function(m){return getSt(m)==='finished';}).forEach(function(m){
+    var ts=getTeams(m), sc=getScore(m);
+    var hG=+sc.h||0, aG=+sc.a||0;
+    if(!realPts[ts.h]) realPts[ts.h]=0;
+    if(!realPts[ts.a]) realPts[ts.a]=0;
+    realPts[ts.h] += hG>aG?3:hG===aG?1:0;
+    realPts[ts.a] += aG>hG?3:aG===hG?1:0;
+  });
+
+  // Pre-calcular qué partidos ya están jugados
+  var played = new Set();
+  liveMatches.filter(function(m){return getSt(m)==='finished';}).forEach(function(m){
+    var ts=getTeams(m);
+    played.add(ts.h+'|'+ts.a);
+    played.add(ts.a+'|'+ts.h);
+  });
+
   for(var iter=0;iter<N;iter++){
-    // Simular cada grupo → obtener top 2
     var adv=[];
     Object.entries(GROUPS).forEach(function(entry){
       var g=entry[0], names=entry[1];
-      // Puntos de partidos ya jugados + simular los restantes
       var pts={};
-      names.forEach(function(n){ pts[n]=0; });
-      // Partidos reales jugados
-      liveMatches.filter(function(m){return getSt(m)==='finished';}).forEach(function(m){
-        var ts=getTeams(m), sc=getScore(m);
-        var hG=+sc.h||0, aG=+sc.a||0;
-        if(pts[ts.h]!==undefined) pts[ts.h]+=(hG>aG?3:hG===aG?1:0);
-        if(pts[ts.a]!==undefined) pts[ts.a]+=(aG>hG?3:aG===hG?1:0);
-      });
-      // Simular partidos pendientes
+      names.forEach(function(n){ pts[n]=realPts[n]||0; });
+
+      // Simular partidos PENDIENTES con aleatoriedad
       for(var i=0;i<names.length;i++){
         for(var j=i+1;j<names.length;j++){
-          var tA=allTeams.find(function(t){return t.team===names[i];})||{team:names[i],fifa_rating:1600,form_score:50};
-          var tB=allTeams.find(function(t){return t.team===names[j];})||{team:names[j],fifa_rating:1600,form_score:50};
-          // Solo simular si no está ya jugado
-          var played=liveMatches.some(function(m){
-            var ts=getTeams(m);
-            return getSt(m)==='finished'&&((ts.h===names[i]&&ts.a===names[j])||(ts.h===names[j]&&ts.a===names[i]));
-          });
-          if(played) continue;
-          var res=simWin(tA,tB);
-          if(res.winner&&res.winner.team===names[i]){ pts[names[i]]+=3; }
-          else if(res.winner&&res.winner.team===names[j]){ pts[names[j]]+=3; }
+          var key=names[i]+'|'+names[j];
+          if(played.has(key)) continue; // ya jugado, usar puntos reales
+          var w=simWinRnd(getT(names[i]),getT(names[j]));
+          if(w.team===names[i])      pts[names[i]]+=3;
+          else if(w.team===names[j]) pts[names[j]]+=3;
           else { pts[names[i]]+=1; pts[names[j]]+=1; }
         }
       }
-      // Top 2 del grupo
-      var sorted=names.slice().sort(function(a,b){ return (pts[b]||0)-(pts[a]||0); });
-      adv.push(sorted[0]); adv.push(sorted[1]);
+      // Top 2 del grupo (con diferencia de goles simulada como desempate)
+      var ranked=names.slice().sort(function(a,b){ return (pts[b]||0)-(pts[a]||0); });
+      adv.push(ranked[0]); adv.push(ranked[1]);
     });
-    // 16avos de final (32 equipos → 16)
-    var r32=[];
-    for(var k=0;k<adv.length;k+=2){
-      var tA2=allTeams.find(function(t){return t.team===adv[k];})||{team:adv[k],fifa_rating:1600,form_score:50};
-      var tB2=allTeams.find(function(t){return t.team===adv[k+1];})||{team:adv[k+1],fifa_rating:1600,form_score:50};
-      r32.push(simWin(tA2,tB2).winner||tA2);
-    }
-    // 8vos
-    var r16=[];
-    for(var k=0;k<r32.length;k+=2){
-      r16.push(simWin(r32[k],r32[k+1]).winner||r32[k]);
-    }
-    // 4tos
-    var rQ=[];
-    for(var k=0;k<r16.length;k+=2){
-      rQ.push(simWin(r16[k],r16[k+1]).winner||r16[k]);
-    }
-    // Semis
-    var rS=[];
-    for(var k=0;k<rQ.length;k+=2){
-      rS.push(simWin(rQ[k],rQ[k+1]).winner||rQ[k]);
+
+    // Fase eliminatoria — 16avos de final
+    var rnd=adv.map(function(n){ return getT(n); });
+    // 16 → 8 → 4 → 2 → 1
+    for(var round=0;round<4;round++){
+      var next=[];
+      for(var k=0;k<rnd.length;k+=2){
+        next.push(getT(simWinRnd(rnd[k],rnd[k+1]).team));
+      }
+      rnd=next;
     }
     // Final
-    var champ=simWin(rS[0],rS[1]).winner||rS[0];
+    var champ=simWinRnd(rnd[0],rnd[1]);
     if(champ&&champ.team) wins[champ.team]=(wins[champ.team]||0)+1;
   }
-  // Convertir a porcentajes
+
   var probs={};
-  Object.keys(wins).forEach(function(k){ probs[k]=+(wins[k]/N*100).toFixed(1); });
+  Object.keys(wins).forEach(function(k){ if(wins[k]>0) probs[k]=+(wins[k]/N*100).toFixed(1); });
   return probs;
 }
 
@@ -1619,18 +1616,36 @@ function getGrpTeam(pos,grp){
   teams.sort((a,b)=>{ const d=getGPts(b.team,grp)-getGPts(a.team,grp); return d!==0?d:(b.fifa_rating||1600)-(a.fifa_rating||1600); });
   return teams[pos-1]||null;
 }
-function simWin(a,b){
-  if(!a) return {winner:b,pA:30,pB:70};
-  if(!b) return {winner:a,pA:70,pB:30};
-  // Score unificado: mismo que calcChamp usa internamente
-  var sA=(a.fifa_rating||1600)*0.55+(a.form_score||50)*0.30+(a.avg_goals_scored||1.2)*10-(a.avg_goals_conceded||1.2)*8;
-  var sB=(b.fifa_rating||1600)*0.55+(b.form_score||50)*0.30+(b.avg_goals_scored||1.2)*10-(b.avg_goals_conceded||1.2)*8;
-  var diff=sA-sB;
-  var rawP=1/(1+Math.exp(-diff*0.007));
-  // Clamp realista: en fútbol nadie gana más del 75%
-  var pA=Math.max(0.27,Math.min(0.73,rawP));
-  return {winner:pA>0.5?a:b, pA:Math.round(pA*100), pB:Math.round((1-pA)*100)};
+function _teamScore(t){
+  // Score normalizado: FIFA rating es la base, forma y goles ajustan
+  return (t.fifa_rating||1600)*0.55 + (t.form_score||50)*0.30
+       + (t.avg_goals_scored||1.2)*10 - (t.avg_goals_conceded||1.2)*8;
 }
+function _winProb(a,b){
+  // Probabilidad de victoria para 'a' contra 'b' — clamp realista [0.27, 0.73]
+  var diff = _teamScore(a) - _teamScore(b);
+  var raw  = 1 / (1 + Math.exp(-diff * 0.007));
+  return Math.max(0.27, Math.min(0.73, raw));
+}
+// Determinístico: para el bracket visual (mismo resultado siempre)
+function simWin(a,b){
+  if(!a) return {winner:b, pA:30, pB:70};
+  if(!b) return {winner:a, pA:70, pB:30};
+  var pA = _winProb(a,b);
+  return {winner: pA>=0.5?a:b, pA:Math.round(pA*100), pB:Math.round((1-pA)*100)};
+}
+// Estocástico: para Monte Carlo (aleatorio según probabilidades)
+function simWinRnd(a,b){
+  if(!a) return b;
+  if(!b) return a;
+  var pA = _winProb(a,b);
+  // Incluir empate → 30% de los casos se resuelve en penales (aleatorio)
+  var r = Math.random();
+  if(r < pA)          return a;
+  else if(r < pA+0.2) return (Math.random()<0.5?a:b); // empate → penales
+  else                return b;
+}
+
 function tsHtml(t,isWin,prob){
   if(!t) return '<div class="ts tbd"><span class="ts-name">?</span></div>';
   var e=FLAG_EMOJI[t.team]||'🏳',c=CODES[t.team]||t.team.slice(0,3).toUpperCase();
