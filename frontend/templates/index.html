@@ -953,38 +953,78 @@ function wakeUpServer(){
 
 async function loadServerData(){
   try{
-    // Cargar equipos y partidos en paralelo
-    const [tr,mr]=await Promise.all([
+    const[tr,mr]=await Promise.all([
       fetch(API+'/api/teams',{cache:'no-cache'}),
       fetch(API+'/api/matches/live',{cache:'no-cache'})
     ]);
     if(tr.ok){
       const serverTeams=await tr.json();
       if(Array.isArray(serverTeams)&&serverTeams.length>0){
-        allTeams=serverTeams;
-        renderTeams(allTeams);
-        populateSels();
-        renderGroups();
+        allTeams=serverTeams; renderTeams(allTeams); populateSels(); renderGroups();
       }
     }
     if(mr.ok){
       const serverMatches=await mr.json();
       if(Array.isArray(serverMatches)&&serverMatches.length>0){
-        liveMatches=serverMatches;
-        processStats(); renderMatches();
+        liveMatches=serverMatches; processStats(); renderMatches(); renderGroups(); renderChamp();
       }
     }
-    renderChamp();
+    // Intentar ESPN directo desde el browser (IP del usuario, no bloqueada)
+    fetchLiveFromBrowser().catch(function(){});
   }catch(e){
-    // Datos locales ya visibles, sin crash
-    console.log('Server no disponible, usando datos locales');
+    console.log('loadServerData error:', e);
   }
 }
 
-// =========================================================
-// MATCHES
-// =========================================================
-// loadMatches - actualiza desde servidor sin borrar datos actuales
+// Fetch desde el browser para bypasear restricciones de IP del servidor
+async function fetchLiveFromBrowser(){
+  var proxies=[
+    'https://api.allorigins.win/raw?url='+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
+    'https://corsproxy.io/?'+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
+  ];
+  for(var i=0;i<proxies.length;i++){
+    try{
+      var r=await fetch(proxies[i],{signal:AbortSignal.timeout(7000)});
+      if(!r.ok) continue;
+      var d=await r.json();
+      var events=d.events||[];
+      if(!events.length) continue;
+      var updated=0;
+      events.forEach(function(ev){
+        var comp=(ev.competitions||[{}])[0];
+        var competitors=comp.competitors||[];
+        var home=competitors.find(function(c){return c.homeAway==='home';})||competitors[0]||{};
+        var away=competitors.find(function(c){return c.homeAway==='away';})||competitors[1]||{};
+        var statusType=(comp.status||{}).type||{};
+        var completed=statusType.completed||false;
+        var inProgress=statusType.state==='in';
+        var st=completed?'FT':inProgress?'LIVE':'TIMED';
+        var homeN=nes((home.team||{}).displayName||'');
+        var awayN=nes((away.team||{}).displayName||'');
+        if(!homeN||!awayN) return;
+        var hS=completed||inProgress?parseInt(home.score)||0:null;
+        var aS=completed||inProgress?parseInt(away.score)||0:null;
+        // Actualizar o agregar el partido
+        var existing=liveMatches.find(function(lm){
+          return lm.homeTeam.name===homeN&&lm.awayTeam.name===awayN;
+        });
+        if(existing){
+          if(existing.status.short!==st||existing.score.fullTime.home!==hS){
+            existing.score={fullTime:{home:hS,away:aS}};
+            existing.status={short:st};
+            updated++;
+          }
+        }
+      });
+      if(updated>0){
+        console.log(updated+' partidos actualizados via browser fetch');
+        processStats(); renderMatches(); renderGroups(); renderChamp();
+      }
+      return;
+    }catch(e){ /* probar siguiente proxy */ }
+  }
+}
+
 async function loadMatches(){
   try{
     const r=await fetch(API+'/api/matches/live',{cache:'no-cache'});
