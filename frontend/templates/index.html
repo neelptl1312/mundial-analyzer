@@ -897,132 +897,86 @@ async function init(){
 }
 
 function buildLocalMatches(){
+  // Resultados reales del Mundial 2026 (actualizado Jun 15, 2026)
+  // Jun 11: A - México 2-0 Sudáfrica, Corea del Sur 2-1 Chequia
+  // Jun 12: B - Canadá 1-1 Bosnia y Herz.   D - EE.UU. 4-1 Paraguay
+  // Jun 13: B - Qatar 0-3 Suiza   C - Brasil 1-1 Marruecos, Escocia 1-0 Haití   D - Australia 2-0 Turquía
+  // Jun 14: E - Alemania 7-1 Curazao, Costa de Marfil 1-0 Ecuador   F - Países Bajos 2-2 Japón, Suecia 5-1 Túnez
+  // Jun 15 (hoy): G - Bélgica vs Egipto, Irán vs Nueva Zelanda   H - España vs Cabo Verde, Arabia Saudita vs Uruguay
   return [
+    // ─ GRUPO A ─
     {id:1,homeTeam:{name:"México"},awayTeam:{name:"Sudáfrica"},score:{fullTime:{home:2,away:0}},status:{short:"FT"},utcDate:"2026-06-11T19:00:00Z",group:"Grupo A"},
     {id:2,homeTeam:{name:"Corea del Sur"},awayTeam:{name:"Chequia"},score:{fullTime:{home:2,away:1}},status:{short:"FT"},utcDate:"2026-06-11T22:00:00Z",group:"Grupo A"},
-    {id:7,homeTeam:{name:"Canadá"},awayTeam:{name:"Bosnia y Herz."},score:{fullTime:{home:1,away:1}},status:{short:"FT"},utcDate:"2026-06-12T19:00:00Z",group:"Grupo B"},
-    {id:19,homeTeam:{name:"EE.UU."},awayTeam:{name:"Paraguay"},score:{fullTime:{home:4,away:1}},status:{short:"FT"},utcDate:"2026-06-13T01:00:00Z",group:"Grupo D"},
-    {id:8,homeTeam:{name:"Qatar"},awayTeam:{name:"Suiza"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-13T22:00:00Z",group:"Grupo B"},
-    {id:13,homeTeam:{name:"Brasil"},awayTeam:{name:"Marruecos"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-14T01:00:00Z",group:"Grupo C"},
-    {id:14,homeTeam:{name:"Haití"},awayTeam:{name:"Escocia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-14T04:00:00Z",group:"Grupo C"},
-    {id:20,homeTeam:{name:"Australia"},awayTeam:{name:"Turquía"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-14T01:00:00Z",group:"Grupo D"},
     {id:3,homeTeam:{name:"México"},awayTeam:{name:"Corea del Sur"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-18T22:00:00Z",group:"Grupo A"},
     {id:4,homeTeam:{name:"Chequia"},awayTeam:{name:"Sudáfrica"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-18T17:00:00Z",group:"Grupo A"},
+    {id:5,homeTeam:{name:"Chequia"},awayTeam:{name:"México"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-24T22:00:00Z",group:"Grupo A"},
+    {id:6,homeTeam:{name:"Sudáfrica"},awayTeam:{name:"Corea del Sur"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-24T22:00:00Z",group:"Grupo A"},
+    // ─ GRUPO B ─
+    {id:7,homeTeam:{name:"Canadá"},awayTeam:{name:"Bosnia y Herz."},score:{fullTime:{home:1,away:1}},status:{short:"FT"},utcDate:"2026-06-12T19:00:00Z",group:"Grupo B"},
+    {id:8,homeTeam:{name:"Qatar"},awayTeam:{name:"Suiza"},score:{fullTime:{home:0,away:3}},status:{short:"FT"},utcDate:"2026-06-13T22:00:00Z",group:"Grupo B"},
     {id:9,homeTeam:{name:"Canadá"},awayTeam:{name:"Suiza"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T22:00:00Z",group:"Grupo B"},
     {id:10,homeTeam:{name:"Bosnia y Herz."},awayTeam:{name:"Qatar"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T19:00:00Z",group:"Grupo B"},
-    {id:25,homeTeam:{name:"Alemania"},awayTeam:{name:"Curazao"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T01:00:00Z",group:"Grupo E"},
-    {id:26,homeTeam:{name:"Costa de Marfil"},awayTeam:{name:"Ecuador"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T22:00:00Z",group:"Grupo E"},
-    {id:31,homeTeam:{name:"Países Bajos"},awayTeam:{name:"Japón"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T01:00:00Z",group:"Grupo F"},
-    {id:32,homeTeam:{name:"Túnez"},awayTeam:{name:"Suecia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T22:00:00Z",group:"Grupo F"},
-    {id:37,homeTeam:{name:"Bélgica"},awayTeam:{name:"Egipto"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T01:00:00Z",group:"Grupo G"},
-    {id:38,homeTeam:{name:"Irán"},awayTeam:{name:"Nueva Zelanda"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T22:00:00Z",group:"Grupo G"},
-    {id:43,homeTeam:{name:"España"},awayTeam:{name:"Cabo Verde"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T01:00:00Z",group:"Grupo H"},
-    {id:44,homeTeam:{name:"Arabia Saudita"},awayTeam:{name:"Uruguay"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T22:00:00Z",group:"Grupo H"},
-    {id:49,homeTeam:{name:"Francia"},awayTeam:{name:"Senegal"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-18T19:00:00Z",group:"Grupo I"},
-    {id:50,homeTeam:{name:"Noruega"},awayTeam:{name:"Irak"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-18T22:00:00Z",group:"Grupo I"},
-    {id:55,homeTeam:{name:"Argentina"},awayTeam:{name:"Argelia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-19T19:00:00Z",group:"Grupo J"},
-    {id:56,homeTeam:{name:"Austria"},awayTeam:{name:"Jordania"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-19T22:00:00Z",group:"Grupo J"},
-    {id:61,homeTeam:{name:"Portugal"},awayTeam:{name:"Colombia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T19:00:00Z",group:"Grupo K"},
-    {id:62,homeTeam:{name:"Uzbekistán"},awayTeam:{name:"RD Congo"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T22:00:00Z",group:"Grupo K"},
-    {id:67,homeTeam:{name:"Inglaterra"},awayTeam:{name:"Croacia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T19:00:00Z",group:"Grupo L"},
-    {id:68,homeTeam:{name:"Ghana"},awayTeam:{name:"Panamá"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T22:00:00Z",group:"Grupo L"},
+    {id:11,homeTeam:{name:"Suiza"},awayTeam:{name:"Bosnia y Herz."},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-22T22:00:00Z",group:"Grupo B"},
+    {id:12,homeTeam:{name:"Qatar"},awayTeam:{name:"Canadá"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-22T22:00:00Z",group:"Grupo B"},
+    // ─ GRUPO C ─
+    {id:13,homeTeam:{name:"Brasil"},awayTeam:{name:"Marruecos"},score:{fullTime:{home:1,away:1}},status:{short:"FT"},utcDate:"2026-06-14T01:00:00Z",group:"Grupo C"},
+    {id:14,homeTeam:{name:"Escocia"},awayTeam:{name:"Haití"},score:{fullTime:{home:1,away:0}},status:{short:"FT"},utcDate:"2026-06-14T04:00:00Z",group:"Grupo C"},
+    {id:15,homeTeam:{name:"Escocia"},awayTeam:{name:"Marruecos"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-19T22:00:00Z",group:"Grupo C"},
+    {id:16,homeTeam:{name:"Brasil"},awayTeam:{name:"Haití"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T01:00:00Z",group:"Grupo C"},
+    {id:17,homeTeam:{name:"Escocia"},awayTeam:{name:"Brasil"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-24T22:00:00Z",group:"Grupo C"},
+    {id:18,homeTeam:{name:"Marruecos"},awayTeam:{name:"Haití"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-24T22:00:00Z",group:"Grupo C"},
+    // ─ GRUPO D ─
+    {id:19,homeTeam:{name:"EE.UU."},awayTeam:{name:"Paraguay"},score:{fullTime:{home:4,away:1}},status:{short:"FT"},utcDate:"2026-06-13T01:00:00Z",group:"Grupo D"},
+    {id:20,homeTeam:{name:"Australia"},awayTeam:{name:"Turquía"},score:{fullTime:{home:2,away:0}},status:{short:"FT"},utcDate:"2026-06-14T01:00:00Z",group:"Grupo D"},
+    {id:21,homeTeam:{name:"EE.UU."},awayTeam:{name:"Australia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-19T19:00:00Z",group:"Grupo D"},
+    {id:22,homeTeam:{name:"Turquía"},awayTeam:{name:"Paraguay"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T01:00:00Z",group:"Grupo D"},
+    {id:23,homeTeam:{name:"Turquía"},awayTeam:{name:"EE.UU."},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T22:00:00Z",group:"Grupo D"},
+    {id:24,homeTeam:{name:"Paraguay"},awayTeam:{name:"Australia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T22:00:00Z",group:"Grupo D"},
+    // ─ GRUPO E ─
+    {id:25,homeTeam:{name:"Alemania"},awayTeam:{name:"Curazao"},score:{fullTime:{home:7,away:1}},status:{short:"FT"},utcDate:"2026-06-14T22:00:00Z",group:"Grupo E"},
+    {id:26,homeTeam:{name:"Costa de Marfil"},awayTeam:{name:"Ecuador"},score:{fullTime:{home:1,away:0}},status:{short:"FT"},utcDate:"2026-06-15T01:00:00Z",group:"Grupo E"},
+    {id:27,homeTeam:{name:"Alemania"},awayTeam:{name:"Costa de Marfil"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T20:00:00Z",group:"Grupo E"},
+    {id:28,homeTeam:{name:"Ecuador"},awayTeam:{name:"Curazao"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T00:00:00Z",group:"Grupo E"},
+    {id:29,homeTeam:{name:"Ecuador"},awayTeam:{name:"Alemania"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T20:00:00Z",group:"Grupo E"},
+    {id:30,homeTeam:{name:"Curazao"},awayTeam:{name:"Costa de Marfil"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T20:00:00Z",group:"Grupo E"},
+    // ─ GRUPO F ─
+    {id:31,homeTeam:{name:"Países Bajos"},awayTeam:{name:"Japón"},score:{fullTime:{home:2,away:2}},status:{short:"FT"},utcDate:"2026-06-15T01:00:00Z",group:"Grupo F"},
+    {id:32,homeTeam:{name:"Suecia"},awayTeam:{name:"Túnez"},score:{fullTime:{home:5,away:1}},status:{short:"FT"},utcDate:"2026-06-15T22:00:00Z",group:"Grupo F"},
+    {id:33,homeTeam:{name:"Países Bajos"},awayTeam:{name:"Suecia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-20T17:00:00Z",group:"Grupo F"},
+    {id:34,homeTeam:{name:"Túnez"},awayTeam:{name:"Japón"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T00:00:00Z",group:"Grupo F"},
+    {id:35,homeTeam:{name:"Japón"},awayTeam:{name:"Suecia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T23:00:00Z",group:"Grupo F"},
+    {id:36,homeTeam:{name:"Túnez"},awayTeam:{name:"Países Bajos"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T23:00:00Z",group:"Grupo F"},
+    // ─ GRUPO G ─ (hoy Jun 15)
+    {id:37,homeTeam:{name:"Bélgica"},awayTeam:{name:"Egipto"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T19:00:00Z",group:"Grupo G"},
+    {id:38,homeTeam:{name:"Irán"},awayTeam:{name:"Nueva Zelanda"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T01:00:00Z",group:"Grupo G"},
+    {id:39,homeTeam:{name:"Bélgica"},awayTeam:{name:"Irán"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T19:00:00Z",group:"Grupo G"},
+    {id:40,homeTeam:{name:"Nueva Zelanda"},awayTeam:{name:"Egipto"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-22T01:00:00Z",group:"Grupo G"},
+    // ─ GRUPO H ─ (hoy Jun 15)
+    {id:43,homeTeam:{name:"España"},awayTeam:{name:"Cabo Verde"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T16:00:00Z",group:"Grupo H"},
+    {id:44,homeTeam:{name:"Arabia Saudita"},awayTeam:{name:"Uruguay"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-15T22:00:00Z",group:"Grupo H"},
+    {id:45,homeTeam:{name:"España"},awayTeam:{name:"Arabia Saudita"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T16:00:00Z",group:"Grupo H"},
+    {id:46,homeTeam:{name:"Uruguay"},awayTeam:{name:"Cabo Verde"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-21T22:00:00Z",group:"Grupo H"},
+    // ─ GRUPO I ─ (mañana Jun 16)
+    {id:49,homeTeam:{name:"Francia"},awayTeam:{name:"Senegal"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T19:00:00Z",group:"Grupo I"},
+    {id:50,homeTeam:{name:"Irak"},awayTeam:{name:"Noruega"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-16T22:00:00Z",group:"Grupo I"},
+    {id:51,homeTeam:{name:"Francia"},awayTeam:{name:"Irak"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-22T21:00:00Z",group:"Grupo I"},
+    {id:52,homeTeam:{name:"Noruega"},awayTeam:{name:"Senegal"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-23T00:00:00Z",group:"Grupo I"},
+    // ─ GRUPO J ─ (mañana Jun 16)
+    {id:55,homeTeam:{name:"Argentina"},awayTeam:{name:"Argelia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T01:00:00Z",group:"Grupo J"},
+    {id:56,homeTeam:{name:"Austria"},awayTeam:{name:"Jordania"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T00:00:00Z",group:"Grupo J"},
+    {id:57,homeTeam:{name:"Argentina"},awayTeam:{name:"Austria"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-22T17:00:00Z",group:"Grupo J"},
+    {id:58,homeTeam:{name:"Jordania"},awayTeam:{name:"Argelia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-23T23:00:00Z",group:"Grupo J"},
+    // ─ GRUPO K ─
+    {id:61,homeTeam:{name:"Portugal"},awayTeam:{name:"RD Congo"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T17:00:00Z",group:"Grupo K"},
+    {id:62,homeTeam:{name:"Uzbekistán"},awayTeam:{name:"Colombia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-18T22:00:00Z",group:"Grupo K"},
+    {id:63,homeTeam:{name:"Portugal"},awayTeam:{name:"Uzbekistán"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-23T17:00:00Z",group:"Grupo K"},
+    {id:64,homeTeam:{name:"Colombia"},awayTeam:{name:"RD Congo"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-23T22:00:00Z",group:"Grupo K"},
+    // ─ GRUPO L ─
+    {id:67,homeTeam:{name:"Inglaterra"},awayTeam:{name:"Croacia"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T20:00:00Z",group:"Grupo L"},
+    {id:68,homeTeam:{name:"Ghana"},awayTeam:{name:"Panamá"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-17T23:00:00Z",group:"Grupo L"},
+    {id:69,homeTeam:{name:"Inglaterra"},awayTeam:{name:"Panamá"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T19:00:00Z",group:"Grupo L"},
+    {id:70,homeTeam:{name:"Croacia"},awayTeam:{name:"Ghana"},score:{fullTime:{home:null,away:null}},status:{short:"TIMED"},utcDate:"2026-06-25T22:00:00Z",group:"Grupo L"},
   ];
-}
-
-function wakeUpServer(){
-  const st=document.getElementById('api-st');
-  const banner=document.getElementById('wake-banner');
-  // Mostrar banner si tarda más de 2 segundos
-  const bannerTimer=setTimeout(()=>{ if(banner) banner.style.display='block'; },2000);
-  fetch(API+'/api/status',{method:'GET',cache:'no-cache'})
-    .then(r=>r.json())
-    .then(d=>{
-      clearTimeout(bannerTimer);
-      if(banner) banner.style.display='none';
-      st.textContent=d.teams_loaded+' equipos';
-      st.style.color='var(--green)';
-      setTimeout(()=>{ st.style.color=''; },3000);
-    })
-    .catch(()=>{
-      clearTimeout(bannerTimer);
-      if(banner) banner.style.display='none';
-      st.textContent='Datos locales';
-      st.style.color='var(--text3)';
-    });
-}
-
-async function loadServerData(){
-  try{
-    const[tr,mr]=await Promise.all([
-      fetch(API+'/api/teams',{cache:'no-cache'}),
-      fetch(API+'/api/matches/live',{cache:'no-cache'})
-    ]);
-    if(tr.ok){
-      const serverTeams=await tr.json();
-      if(Array.isArray(serverTeams)&&serverTeams.length>0){
-        allTeams=serverTeams; renderTeams(allTeams); populateSels(); renderGroups();
-      }
-    }
-    if(mr.ok){
-      const serverMatches=await mr.json();
-      if(Array.isArray(serverMatches)&&serverMatches.length>0){
-        liveMatches=serverMatches; processStats(); renderMatches(); renderGroups(); renderChamp();
-      }
-    }
-    // Intentar ESPN directo desde el browser (IP del usuario, no bloqueada)
-    fetchLiveFromBrowser().catch(function(){});
-  }catch(e){
-    console.log('loadServerData error:', e);
-  }
-}
-
-// Fetch desde el browser para bypasear restricciones de IP del servidor
-async function fetchLiveFromBrowser(){
-  var proxies=[
-    'https://api.allorigins.win/raw?url='+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
-    'https://corsproxy.io/?'+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
-  ];
-  for(var i=0;i<proxies.length;i++){
-    try{
-      var r=await fetch(proxies[i],{signal:AbortSignal.timeout(7000)});
-      if(!r.ok) continue;
-      var d=await r.json();
-      var events=d.events||[];
-      if(!events.length) continue;
-      var updated=0;
-      events.forEach(function(ev){
-        var comp=(ev.competitions||[{}])[0];
-        var competitors=comp.competitors||[];
-        var home=competitors.find(function(c){return c.homeAway==='home';})||competitors[0]||{};
-        var away=competitors.find(function(c){return c.homeAway==='away';})||competitors[1]||{};
-        var statusType=(comp.status||{}).type||{};
-        var completed=statusType.completed||false;
-        var inProgress=statusType.state==='in';
-        var st=completed?'FT':inProgress?'LIVE':'TIMED';
-        var homeN=nes((home.team||{}).displayName||'');
-        var awayN=nes((away.team||{}).displayName||'');
-        if(!homeN||!awayN) return;
-        var hS=completed||inProgress?parseInt(home.score)||0:null;
-        var aS=completed||inProgress?parseInt(away.score)||0:null;
-        // Actualizar o agregar el partido
-        var existing=liveMatches.find(function(lm){
-          return lm.homeTeam.name===homeN&&lm.awayTeam.name===awayN;
-        });
-        if(existing){
-          if(existing.status.short!==st||existing.score.fullTime.home!==hS){
-            existing.score={fullTime:{home:hS,away:aS}};
-            existing.status={short:st};
-            updated++;
-          }
-        }
-      });
-      if(updated>0){
-        console.log(updated+' partidos actualizados via browser fetch');
-        processStats(); renderMatches(); renderGroups(); renderChamp();
-      }
-      return;
-    }catch(e){ /* probar siguiente proxy */ }
-  }
 }
 
 async function loadMatches(){
@@ -1930,56 +1884,61 @@ function useTicket(picks){
   setTimeout(calcParlay,400);
 }
 async function parlayDelDia(){
-  var tod=todayPA();
-  var todayGames=liveMatches.filter(function(m){
-    var st=getSt(m);
-    if(st==='finished') return false;
-    var md=m.utcDate?msPA(m.utcDate):'';
-    return md===tod;
+  var tod = todayPA();
+  // SOLO partidos de HOY que NO estén jugados ni en vivo
+  var todayPending = liveMatches.filter(function(m){
+    if(getSt(m) === 'finished') return false;  // ya terminó
+    if(getSt(m) === 'live')     return false;  // en vivo (no apostar)
+    var md = m.utcDate ? msPA(m.utcDate) : '';
+    return md === tod;
   });
 
-  if(!todayGames.length){
-    var nextGames=liveMatches.filter(function(m){return getSt(m)==='scheduled';})
-      .sort(function(a,b){return new Date(a.utcDate||0)-new Date(b.utcDate||0);});
-    if(!nextGames.length){ toast('No hay partidos disponibles'); return; }
-    todayGames=nextGames.slice(0,4);
+  if(!todayPending.length){
+    // Buscar próximos partidos disponibles
+    var nxt = liveMatches.filter(function(m){
+      return getSt(m)==='scheduled';
+    }).sort(function(a,b){
+      return new Date(a.utcDate||0)-new Date(b.utcDate||0);
+    });
+    if(!nxt.length){ toast('No hay partidos pendientes'); return; }
+    todayPending = nxt.slice(0,4);
+    toast('No hay más partidos hoy - usando próximos');
   }
 
-  // Botón visual de carga
-  var btn=document.querySelector('[onclick="parlayDelDia()"]');
+  var btn = document.querySelector('[onclick="parlayDelDia()"]');
   if(btn){ btn.textContent='⏳ Analizando...'; btn.disabled=true; }
 
-  legs=[];
-  var minP=65; // Solo picks con 65%+ de probabilidad
+  legs = [];
+  var MIN_PROB = 63;
 
-  // Analizar cada partido con la API real
-  var promises=todayGames.slice(0,4).map(function(m){
-    var teams=getTeams(m), hName=teams.h, aName=teams.a;
-    var hT=allTeams.find(function(t){return t.team===hName||hName.includes(t.team.split(' ')[0]);});
-    var aT=allTeams.find(function(t){return t.team===aName||aName.includes(t.team.split(' ')[0]);});
-    if(!hT||!aT) return Promise.resolve(null);
+  var promises = todayPending.slice(0,4).map(function(m){
+    var ts = getTeams(m);
+    var hN = ts.h, aN = ts.a;
+    var hT = allTeams.find(function(t){return t.team===hN||nes(hN)===t.team;}) || {team:hN};
+    var aT = allTeams.find(function(t){return t.team===aN||nes(aN)===t.team;}) || {team:aN};
     return fetch(API+'/api/match/analyze?home='+encodeURIComponent(hT.team)+'&away='+encodeURIComponent(aT.team))
-      .then(function(r){return r.json();})
+      .then(function(r){ return r.json(); })
       .then(function(d){
-        var pick=pickCredible(d, hT.team, aT.team, minP);
+        var pick = pickCredible(d, hT.team, aT.team, MIN_PROB);
         if(!pick) return null;
-        return {home:hT.team, away:aT.team, pick_type:pick.type, display:hT.team+' vs '+aT.team+' · '+pick.label+' ('+pick.prob+'%)'};
+        return {
+          home: hT.team, away: aT.team,
+          pick_type: pick.type,
+          display: hT.team+' vs '+aT.team+' · '+pick.label+' ('+Math.round(pick.prob)+'%)'
+        };
       }).catch(function(){ return null; });
   });
 
   Promise.all(promises).then(function(results){
     results.forEach(function(r){ if(r) legs.push(r); });
     if(btn){ btn.textContent='📅 Parlay del día'; btn.disabled=false; }
-
     if(!legs.length){
-      toast('No se encontraron picks con 65%+ de probabilidad hoy');
+      toast('Sin picks con '+MIN_PROB+'%+ de confianza para hoy');
       return;
     }
-
     renderLegs();
     goTab('parlay');
-    var prob=Math.pow(0.67, legs.length)*100;
-    toast('📅 '+legs.length+' picks seguros del día · ~'+prob.toFixed(0)+'% prob combinada');
+    toast('📅 '+legs.length+' picks del día · solo partidos pendientes');
     setTimeout(calcParlay, 500);
   });
 }
