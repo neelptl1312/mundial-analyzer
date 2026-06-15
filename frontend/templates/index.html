@@ -1331,6 +1331,48 @@ function prefill(h,a,type){
 }
 function prefillAll(h,a){showQuickPickModal(h,a);}
 
+function showQuickPickModal(h,a){
+  document.getElementById('modal-title').textContent='+ Agregar al Parlay';
+  document.getElementById('modal-sub').innerHTML='<b>'+h+'</b> <span style="color:var(--text3)">vs</span> <b>'+a+'</b>';
+  document.getElementById('modal-body').innerHTML='<div class="loader"><span class="spin"></span>Cargando...</div>';
+  document.getElementById('ai-modal').classList.add('show');
+  fetch(API+'/api/match/analyze?home='+encodeURIComponent(h)+'&away='+encodeURIComponent(a))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var hw=d.home_win_prob||0,dp=d.draw_prob||0,aw=d.away_win_prob||0;
+      var picks=[
+        {type:'over_15',      prob:d.over_15||88, label:'Más de 1.5 goles'},
+        {type:'home_or_draw', prob:hw+dp,         label:h+' no pierde (1X)'},
+        {type:'away_or_draw', prob:aw+dp,         label:a+' no pierde (X2)'},
+        {type:'home_win',     prob:hw,            label:h+' gana'},
+        {type:'away_win',     prob:aw,            label:a+' gana'},
+        {type:'over_25',      prob:d.over_25||0,  label:'Más de 2.5 goles'},
+        {type:'btts_yes',     prob:d.btts||0,     label:'Ambos anotan'},
+        {type:'draw',         prob:dp,            label:'Empate'},
+      ].sort(function(a,b){return b.prob-a.prob;});
+      var wrap=document.createElement('div');
+      wrap.style.cssText='display:flex;flex-direction:column;gap:6px';
+      var info=document.createElement('div');
+      info.style.cssText='font-size:11px;color:var(--text2);margin-bottom:4px';
+      info.textContent='Elige el pick:';
+      wrap.appendChild(info);
+      picks.forEach(function(p){
+        var color=p.prob>=72?'var(--green)':p.prob>=60?'var(--yellow)':'var(--text3)';
+        var btn=document.createElement('button');
+        btn.style.cssText='display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 14px;cursor:pointer;font-family:Inter,sans-serif;color:var(--text);transition:.15s;width:100%';
+        btn.innerHTML='<span style="font-size:13px;font-weight:600">'+p.label+'</span><span style="font-size:14px;font-weight:800;color:'+color+'">'+Math.round(p.prob)+'%</span>';
+        btn.onclick=(function(pp){ return function(){addPickToParlay(h,a,pp.type,pp.label);closeModal();}; })(p);
+        wrap.appendChild(btn);
+      });
+      var body=document.getElementById('modal-body');
+      body.innerHTML='';
+      body.appendChild(wrap);
+    })
+    .catch(function(){
+      document.getElementById('modal-body').innerHTML='<div style="color:var(--red);padding:1rem;text-align:center">Error. Intenta de nuevo.</div>';
+    });
+}
+
 function addPickToParlay(h,a,type,label){
   legs.push({home:h,away:a,pick_type:type,display:h+' vs '+a+' . '+label});
   renderLegs();
