@@ -979,6 +979,66 @@ function buildLocalMatches(){
   ];
 }
 
+// ── Fetch en vivo desde browser del usuario (IP no bloqueada) ─────────────
+async function fetchLiveFromBrowser(){
+  var sources=[
+    'https://api.allorigins.win/raw?url='+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
+    'https://corsproxy.io/?'+encodeURIComponent('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'),
+    'https://thingproxy.freeboard.io/fetch/https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
+    'https://api.codetabs.com/v1/proxy?quest=https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
+  ];
+  for(var si=0;si<sources.length;si++){
+    try{
+      var ctrl=new AbortController();
+      var tid=setTimeout(function(){ctrl.abort();},8000);
+      var resp=await fetch(sources[si],{signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!resp.ok) continue;
+      var data=await resp.json();
+      var events=data.events||[];
+      if(!events.length) continue;
+      var updated=0,nowLive=0;
+      events.forEach(function(ev){
+        var comp=(ev.competitions||[{}])[0];
+        var comps=comp.competitors||[];
+        var hC=comps.find(function(c){return c.homeAway==='home';})||comps[0]||{};
+        var aC=comps.find(function(c){return c.homeAway==='away';})||comps[1]||{};
+        var stT=(comp.status||{}).type||{};
+        var done=stT.completed||false, inP=stT.state==='in';
+        if(inP) nowLive++;
+        var st=done?'FT':inP?'LIVE':'TIMED';
+        var hN=nes((hC.team||{}).displayName||''), aN=nes((aC.team||{}).displayName||'');
+        if(!hN||!aN) return;
+        var hS=done||inP?parseInt(hC.score)||0:null, aS=done||inP?parseInt(aC.score)||0:null;
+        var found=liveMatches.find(function(lm){
+          var ht=lm.homeTeam&&lm.homeTeam.name||'', at=lm.awayTeam&&lm.awayTeam.name||'';
+          return (ht===hN&&at===aN)||(ht===aN&&at===hN);
+        });
+        if(found&&(getSt(found)!==st||found.score.fullTime.home!==hS)){
+          found.score={fullTime:{home:hS,away:aS}};
+          found.status={short:st};
+          updated++;
+        }
+      });
+      if(updated>0||nowLive>0){
+        processStats();renderMatches();renderGroups();renderChamp();
+        if(nowLive>0){var lv=document.getElementById('lv-ct');if(lv)lv.textContent=nowLive+' LIVE';}
+        console.log('[ESPN browser] updated:'+updated+' live:'+nowLive);
+      }
+      return; // éxito
+    }catch(e){}
+  }
+}
+// Polling inteligente: más frecuente cuando hay partidos en vivo
+function startLivePolling(){
+  var isLive=liveMatches.some(function(m){return getSt(m)==='live';});
+  var delay=isLive?30000:45000;
+  setTimeout(function(){
+    loadServerData().catch(function(){}).finally(function(){ startLivePolling(); });
+  },delay);
+}
+
+
 async function loadMatches(){
   try{
     const r=await fetch(API+'/api/matches/live',{cache:'no-cache'});
@@ -1684,165 +1744,68 @@ function renderBracket(){
 // AI TICKET
 // =========================================================
 const AI_CFG={
-  safe:{label:'🛡️ Ticket Seguro',badge:'tb-safe',desc:'Solo picks con 65%+ de probabilidad. Máximo 3 selecciones.',minProb:65,maxLegs:3},
-  risk:{label:'⚡ Ticket Equilibrado',badge:'tb-risk',desc:'Picks con 55%+ de probabilidad y buen valor esperado. Máximo 4.',minProb:55,maxLegs:4},
-  jackpot:{label:'🚀 Ticket Jackpot',badge:'tb-jack',desc:'Picks con 45%+ incluyendo resultados de mayor cuota. Máximo 5.',minProb:45,maxLegs:5},
+  safe:{label:'🛡️ Ticket Seguro',badge:'tb-safe',desc:'Solo +1.5 goles y doble oportunidad. Prob ≥72%. Máx 3 picks.',minProb:72,maxLegs:3,allowedTypes:['over_15','home_or_draw','away_or_draw']},
+  risk:{label:'⚡ Ticket Equilibrado',badge:'tb-risk',desc:'Picks 62%+. Máx 4 picks.',minProb:62,maxLegs:4,allowedTypes:['over_15','home_or_draw','away_or_draw','home_win','away_win','over_25']},
+  jackpot:{label:'🚀 Ticket Jackpot',badge:'tb-jack',desc:'Picks 50%+. Alto riesgo. Máx 5 picks.',minProb:50,maxLegs:5,allowedTypes:null},
 };
-// Mercados EXCLUIDOS por ser poco fiables en fase de grupos del Mundial
-var EXCLUDED_MARKETS=['over_9_corners','over_3_yellow'];
-// Función central de selección de pick creíble para un partido
-function pickCredible(d, home, away, minProb){
-  // Mercados disponibles ordenados por credibilidad en fútbol
-  var candidates = [
-    // Mercados de resultado - los más fiables
-    {type:'home_win', prob:d.home_win_prob, label:home+' gana', credibility:10},
-    {type:'away_win', prob:d.away_win_prob, label:away+' gana', credibility:10},
-    // Más de 1.5 goles - muy probable en el Mundial (>80% siempre)
-    {type:'over_15', prob:d.over_15||88, label:'Más de 1.5 goles', credibility:8},
-    // Más de 2.5 goles - fiable
-    {type:'over_25', prob:d.over_25, label:'Más de 2.5 goles', credibility:7},
-    // Ambos anotan
-    {type:'btts_yes', prob:d.btts, label:'Ambos anotan - Sí', credibility:6},
-    // Doble oportunidad (1X / X2) - muy seguro
-    {type:'home_or_draw', prob:d.home_win_prob+d.draw_prob, label:home+' no pierde (1X)', credibility:9},
-    {type:'away_or_draw', prob:d.away_win_prob+d.draw_prob, label:away+' no pierde (X2)', credibility:9},
-    // Empate - solo si es muy probable
-    {type:'draw', prob:d.draw_prob, label:'Empate', credibility:5},
-    // Más de 3.5 goles - solo si muy probable (partidos muy atacantes)
-    {type:'over_35', prob:d.over_35, label:'Más de 3.5 goles', credibility:4},
-  ];
-  // Filtrar por probabilidad mínima
-  var valid = candidates.filter(function(p){ return (p.prob||0) >= minProb; });
-  if(!valid.length) return null;
-  // Ordenar: primero por credibilidad, luego por probabilidad
-  valid.sort(function(a,b){
-    // Si hay un ganador claro (+15 pts de prob sobre los demás), preferirlo
-    if(b.credibility !== a.credibility) return b.credibility - a.credibility;
-    return b.prob - a.prob;
-  });
-  // NO incluir ambos anotan + menos de 2.5 (contradicción)
-  // NO incluir resultado + doble oportunidad del mismo equipo (redundante)
-  var pick = valid[0];
-  // Calcular odds reales aproximadas
-  pick.odds = +(100 / Math.max(pick.prob, 1)).toFixed(2);
-  pick.american = pick.prob >= 50 
-    ? '-'+Math.round(pick.prob/100/(1-pick.prob/100)*100)
-    : '+'+Math.round((1-pick.prob/100)/(pick.prob/100)*100);
-  return pick;
-}
-
-async function openAITicket(mode){
-  const cfg=AI_CFG[mode];
-  document.getElementById('modal-title').textContent=cfg.label;
-  document.getElementById('modal-sub').textContent=cfg.desc;
-  document.getElementById('modal-body').innerHTML='<div class="modal-loading"><span class="spin" style="display:block;margin:0 auto 10px;width:22px;height:22px;border-width:3px"></span>Analizando probabilidades...</div>';
-  document.getElementById('ai-modal').classList.add('show');
-  const picks=await genTicket(mode);
-  if(!picks.length){
-    document.getElementById('modal-body').innerHTML='<div class="modal-loading" style="color:var(--red)">No se encontraron picks. Intenta otro modo.</div>';
-    return;
-  }
-  const combined=picks.reduce((acc,p)=>acc*(p.probability/100),1);
-  const cpct=(combined*100).toFixed(2);
-  const odds=(1/combined).toFixed(2);
-  const rating=combined>0.2?' Alta probabilidad':combined>0.08?'OK Valor moderado':' Alto riesgo / alta recompensa';
-  const pColor=combined>0.2?'var(--green)':combined>0.08?'var(--yellow)':'var(--red)';
-  var ph2=picks.map(function(p){ return '<div class="tp"><div class="tp-l"><div class="tp-match">'+p.home+' vs '+p.away+'</div><div class="tp-pick">OK '+p.label+'</div></div><div class="tp-r"><div class="tp-prob">'+p.probability+'%</div><div class="tp-odds">'+p.decimal_odds+'x</div></div></div>'; }).join('');
-  document.getElementById('modal-body').innerHTML='<div class="t-card"><div class="t-badge '+cfg.badge+'">'+cfg.label+'</div><div class="t-picks">'+ph2+'</div><div class="t-totals"><div class="tt-item"><div class="tt-val" style="color:var(--blue)">'+odds+'x</div><div class="tt-lbl">Cuota total</div></div><div class="tt-item"><div class="tt-val" style="color:'+pColor+'">'+cpct+'%</div><div class="tt-lbl">Probabilidad</div></div></div><div style="text-align:center;margin-top:.75rem;font-size:15px">'+rating+'</div></div><button class="btn-use" data-picks="'+encodeURIComponent(JSON.stringify(picks))+'" onclick="useTicket(JSON.parse(decodeURIComponent(this.dataset.picks)))">Usar en el Parlay Builder &gt;</button><div style="font-size:10px;color:var(--text3);text-align:center;margin-top:.75rem">(!) Solo fines informativos.</div>'
-  ;}
-
 async function genTicket(mode){
   var cfg=AI_CFG[mode];
   var tod=todayPA(), tom=tomorrowPA();
-  var picks=[], seen=new Set();
-
-  // Solo partidos de HOY y MAÑANA (sin ya jugados)
   var games=liveMatches.filter(function(m){
-    if(getSt(m)==='finished') return false;
+    if(getSt(m)==='finished'||getSt(m)==='live') return false;
     var md=m.utcDate?msPA(m.utcDate):'';
-    return md===tod||md===tom||getSt(m)==='live';
-  }).sort(function(a,b){
-    var da=a.utcDate?msPA(a.utcDate):'', db=b.utcDate?msPA(b.utcDate):'';
-    if(da===tod&&db!==tod) return -1;
-    if(db===tod&&da!==tod) return 1;
-    return new Date(a.utcDate||0)-new Date(b.utcDate||0);
-  });
-
-  // Si no hay partidos hoy/mañana, usar próximos
+    return md===tod||md===tom;
+  }).sort(function(a,b){return new Date(a.utcDate||0)-new Date(b.utcDate||0);});
   if(!games.length){
     games=liveMatches.filter(function(m){return getSt(m)==='scheduled';})
-      .sort(function(a,b){return new Date(a.utcDate||0)-new Date(b.utcDate||0);})
-      .slice(0,8);
+      .sort(function(a,b){return new Date(a.utcDate||0)-new Date(b.utcDate||0);}).slice(0,8);
   }
-
-  for(var i=0;i<games.length;i++){
-    if(picks.length>=cfg.maxLegs) break;
-    var m=games[i];
-    var teams=getTeams(m), hn=teams.h, an=teams.a;
-    var hT=allTeams.find(function(t){return t.team===hn||hn.includes(t.team.split(' ')[0]);});
-    var aT=allTeams.find(function(t){return t.team===an||an.includes(t.team.split(' ')[0]);});
-    if(!hT||!aT) continue;
-    var key=hT.team+'-'+aT.team;
+  var picks=[],seen=new Set();
+  for(var i=0;i<games.length&&picks.length<cfg.maxLegs;i++){
+    var m=games[i],ts=getTeams(m),hn=ts.h,an=ts.a;
+    var hT=allTeams.find(function(t){return t.team===hn||nes(hn)===t.team;})||{team:hn};
+    var aT=allTeams.find(function(t){return t.team===an||nes(an)===t.team;})||{team:an};
+    var key=hT.team+'|'+aT.team;
     if(seen.has(key)) continue; seen.add(key);
-    var md=m.utcDate?msPA(m.utcDate):'';
-    var dayLbl=md===tod?'HOY':md===tom?'MAÑANA':'PRÓXIMO';
+    var grpRaw=m.group||'';
+    var grp=grpRaw&&!grpRaw.startsWith('GROUP')?grpRaw:(hT.group?'Grupo '+hT.group:'');
+    var md2=m.utcDate?msPA(m.utcDate):'';
+    var dayLbl=md2===tod?'HOY':md2===tom?'MAÑANA':toPD(m.utcDate||'');
     try{
-      var r=await fetch(API+'/api/match/analyze?home='+encodeURIComponent(hT.team)+'&away='+encodeURIComponent(aT.team));
-      var d=await r.json();
-      var pick=pickCredible(d, hT.team, aT.team, cfg.minProb);
-      if(!pick) continue;
-      // Para jackpot: preferir picks de mayor cuota pero que tengan sentido
-      if(mode==='jackpot'){
-        var jackCandidates=[
-          {type:'home_win',prob:d.home_win_prob,label:hT.team+' gana'},
-          {type:'away_win',prob:d.away_win_prob,label:aT.team+' gana'},
-          {type:'over_35',prob:d.over_35,label:'Más de 3.5 goles'},
-          {type:'btts_yes',prob:d.btts,label:'Ambos anotan - Sí'},
-        ].filter(function(p){return p.prob>=cfg.minProb;})
-         .sort(function(a,b){return b.prob-a.prob;}); // jackpot: más probable del modo arriesgado
-        if(jackCandidates.length) pick={
-          type:jackCandidates[0].type, label:jackCandidates[0].label,
-          prob:jackCandidates[0].prob,
-          odds:+(100/Math.max(jackCandidates[0].prob,1)).toFixed(2),
-          american:jackCandidates[0].prob>=50?'-'+Math.round(jackCandidates[0].prob/100/(1-jackCandidates[0].prob/100)*100):'+'+Math.round((1-jackCandidates[0].prob/100)/(jackCandidates[0].prob/100)*100)
-        };
+      var resp=await fetch(API+'/api/match/analyze?home='+encodeURIComponent(hT.team)+'&away='+encodeURIComponent(aT.team));
+      var d=await resp.json();
+      var pick=null;
+      if(cfg.allowedTypes){
+        var hw=d.home_win_prob||0,dp2=d.draw_prob||0,aw=d.away_win_prob||0;
+        var filtered=[
+          {type:'over_15',prob:d.over_15||88,label:'Más de 1.5 goles',cred:10},
+          {type:'home_or_draw',prob:hw+dp2,label:hT.team+' no pierde (1X)',cred:9},
+          {type:'away_or_draw',prob:aw+dp2,label:aT.team+' no pierde (X2)',cred:9},
+          {type:'home_win',prob:hw,label:hT.team+' gana',cred:7},
+          {type:'away_win',prob:aw,label:aT.team+' gana',cred:7},
+          {type:'over_25',prob:d.over_25||0,label:'Más de 2.5 goles',cred:6},
+        ].filter(function(c){return cfg.allowedTypes.indexOf(c.type)>=0&&c.prob>=cfg.minProb;})
+         .sort(function(a,b){return b.cred!==a.cred?b.cred-a.cred:b.prob-a.prob;});
+        if(filtered.length) pick=filtered[0];
+      } else {
+        pick=pickCredible(d,hT.team,aT.team,cfg.minProb);
       }
+      if(!pick) continue;
+      var odds2=+(100/Math.max(pick.prob,1)).toFixed(2);
+      var amer=pick.prob>=50?'-'+Math.round(pick.prob/(100-pick.prob)*100):'+'+Math.round((100-pick.prob)/pick.prob*100);
       picks.push({
         home:hT.team, away:aT.team,
-        group:(m.group&&!m.group.startsWith('GROUP')?m.group:(hT.group?'Grupo '+hT.group:''))+' · '+dayLbl,
+        group:grp+' · '+dayLbl,
         label:pick.label, pick_type:pick.type,
-        probability:Math.round(pick.prob), decimal_odds:pick.odds, american_odds:pick.american,
+        probability:Math.round(pick.prob),
+        decimal_odds:odds2, american_odds:amer,
         matchTime:m.utcDate?toPT(m.utcDate):'',
       });
     }catch(e){}
   }
-
-  // Si quedan picks pendientes, completar con partidos próximos
-  if(picks.length<cfg.maxLegs){
-    var nextM=liveMatches.filter(function(m){return getSt(m)==='scheduled';})
-      .sort(function(a,b){return new Date(a.utcDate||0)-new Date(b.utcDate||0);});
-    for(var j=0;j<nextM.length;j++){
-      if(picks.length>=cfg.maxLegs) break;
-      var m2=nextM[j];
-      var t2=getTeams(m2), hn2=t2.h, an2=t2.a;
-      var hT2=allTeams.find(function(t){return t.team===hn2;});
-      var aT2=allTeams.find(function(t){return t.team===an2;});
-      if(!hT2||!aT2) continue;
-      var key2=hT2.team+'-'+aT2.team;
-      if(seen.has(key2)) continue; seen.add(key2);
-      try{
-        var r2=await fetch(API+'/api/match/analyze?home='+encodeURIComponent(hT2.team)+'&away='+encodeURIComponent(aT2.team));
-        var d2=await r2.json();
-        var pick2=pickCredible(d2, hT2.team, aT2.team, cfg.minProb);
-        if(!pick2) continue;
-        picks.push({
-          home:hT2.team, away:aT2.team,
-          group:(m2.group&&!m2.group.startsWith('GROUP')?m2.group:(hT2.group?'Grupo '+hT2.group:''))+' · '+toPD(m2.utcDate),
-          label:pick2.label, pick_type:pick2.type,
-          probability:Math.round(pick2.prob), decimal_odds:pick2.odds, american_odds:pick2.american,
-        });
-      }catch(e){}
-    }
+  if(mode==='safe'&&picks.length>2){
+    var combined=picks.reduce(function(acc,p){return acc*p.probability/100;},1)*100;
+    if(combined<18) picks=picks.slice(0,2);
   }
   return picks;
 }
